@@ -5,12 +5,12 @@ import uuid as uuidlib
 from typing import List, Optional
 
 from flask import Response, request, make_response
-from flask_restful import Resource
 from psycopg2._psycopg import DatabaseError
 
 from app.common import JSONDecimalEncoder
 from app.common.exception import UserNotFoundException, UserException, AuthError
 from app.common.storage import StorageService, DBStorageService
+from app.resources import API
 
 
 class User(object):
@@ -290,7 +290,7 @@ class UserDB(UserStored):
                     enabled=user_db[self.__enabled_field])
 
 
-class UserAPI(Resource):
+class UserAPI(API):
     __version__ = 1
 
     __api_url__ = 'users'
