@@ -1,11 +1,14 @@
 import logging
 from pprint import pprint
 
+import sys
 from flask import Flask
 
-from app.common.psql_helper import PostgreSQL
-from app.common.storage import DBStorageService
 from app.resources.user import UserAPI
+
+sys.path.insert(0, '../psql_library')
+from psql_helper import PostgreSQL
+from storage_service import DBStorageService
 
 logging.basicConfig(level=logging.DEBUG)
 
