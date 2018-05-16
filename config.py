@@ -7,13 +7,13 @@ class Config(object):
     SECRET_KEY = APP_SESSION_SK
     TEMPLATES_AUTO_RELOAD = True
 
-    VERSION = '1.0'
+    VERSION = 'v1'
     API_BASE_URI = '/api/%s' % VERSION
 
 
 class ProductionConfig(Config):
-    PSQL_DBNAME = ''
-    PSQL_USER = ''
+    PSQL_DBNAME = 'rrnauth'
+    PSQL_USER = 'railroadman'
     PSQL_PASSWORD = ''
     PSQL_HOST = ''
 
@@ -21,10 +21,10 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
 
-    PSQL_DBNAME = ''
-    PSQL_USER = ''
-    PSQL_PASSWORD = ''
-    PSQL_HOST = ''
+    PSQL_DBNAME = 'rrnauth'
+    PSQL_USER = 'railroadman'
+    PSQL_PASSWORD = 'railroadman'
+    PSQL_HOST = '127.0.0.1'
 
 
 class TestingConfig(Config):

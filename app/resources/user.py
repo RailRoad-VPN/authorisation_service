@@ -2,6 +2,7 @@ import json
 import logging
 import sys
 import uuid as uuidlib
+from http import HTTPStatus
 
 from flask import Response, request, make_response
 
@@ -12,8 +13,9 @@ sys.path.insert(0, '../psql_library')
 from storage_service import DBStorageService
 
 sys.path.insert(1, '../rest_api_library')
-from decoder import JSONDecimalEncoder
+from utils import JSONDecimalEncoder
 from api import ResourceAPI
+from services.response import APIResponseStatus, APIResponse
 
 
 class UserAPI(ResourceAPI):
@@ -22,14 +24,6 @@ class UserAPI(ResourceAPI):
     __api_url__ = 'users'
 
     _config = None
-
-    __uuid_field = 'uuid'
-    __email_field = 'email'
-    __password_field = 'password'
-    __account_non_expired_field = 'account_non_expired'
-    __account_non_locked_field = 'account_non_locked'
-    __credentials_non_expired_field = 'credentials_non_expired'
-    __enabled_field = 'enabled'
 
     __db_storage_service = None
 
@@ -41,83 +35,77 @@ class UserAPI(ResourceAPI):
     def post(self) -> Response:
         request_json = request.json
 
-        email = request_json[self.__email_field]
-        password = request_json.get(self.__password_field, None)
-        account_non_expired = request_json.get(self.__account_non_expired_field, True)
-        account_non_locked = request_json.get(self.__account_non_locked_field, True)
-        credentials_non_expired = request_json.get(self.__credentials_non_expired_field, True)
-        enabled = request_json.get(self.__enabled_field, True)
+        email = request_json.get(UserDB.email_field, None)
+        created_date = request_json.get(UserDB.created_date_field, None)
+        password = request_json.get(UserDB.password_field, None)
+        is_expired = request_json.get(UserDB.is_expired_field, None)
+        is_locked = request_json.get(UserDB.is_locked_field, None)
+        is_password_expired = request_json.get(UserDB.is_password_expired_field, None)
+        enabled = request_json.get(UserDB.enabled_field, None)
 
         user_db = UserDB(storage_service=self.__db_storage_service, email=email,
-                         password=password, account_non_expired=account_non_expired,
-                         account_non_locked=account_non_locked, credentials_non_expired=credentials_non_expired,
+                         is_password_expired=is_password_expired,
+                         password=password, created_date=created_date, is_expired=is_expired, is_locked=is_locked,
                          enabled=enabled)
 
         try:
             uuid = user_db.create()
         except UserException as e:
             logging.error(e)
-            code = e.code
-            message = e.message
-            data_err = e.data
-            data = {
-                'error': {
-                    'code': code,
-                    'message': message,
-                    'data': data_err
-                }
-            }
-            if code == AuthError.USER_CREATE_ERROR_DB:
-                http_code = 400
+            error_code = e.error_code
+            error = e.error
+            developer_message = e.developer_message
+            if error_code == AuthError.USER_CREATE_ERROR_DB:
+                http_code = HTTPStatus.BAD_REQUEST
             else:
-                http_code = 500
-            return make_response(json.dumps(data), http_code)
+                http_code = HTTPStatus.INTERNAL_SERVER_ERROR
+            response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
+                                        developer_message=developer_message, error_code=error_code)
+            return make_response(json.dumps(response_data.serialize()), http_code)
 
-        resp = make_response("", 201)
+        resp = make_response('', HTTPStatus.CREATED)
         resp.headers['Location'] = '%s/%s/uuid/%s' % (self._config['API_BASE_URI'], self.__api_url__, uuid)
         return resp
 
     def put(self, uuid: str = None) -> Response:
         request_json = request.json
-        user_uuid = request_json[self.__uuid_field]
+        user_uuid = request_json.get(UserDB.uuid_field, None)
         if uuid != user_uuid:
-            return make_response('', 404)
+            error = AuthError.USER_FINDBYUUID_ERROR.phrase
+            error_code = AuthError.USER_FINDBYUUID_ERROR
+            developer_message = AuthError.USER_FINDBYUUID_ERROR.description
+            http_code = HTTPStatus.BAD_REQUEST
+            response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
+                                        developer_message=developer_message, error_code=error_code)
+            resp = make_response(json.dumps(response_data.serialize()), http_code)
+            return resp
 
         try:
             uuidlib.UUID(user_uuid)
-        except ValueError as e:
-            message = 'User not found'
-            developer_message = 'Bad uuid value.'
-            system_error_code = AuthError.USER_FINDBYUUID_ERROR
-            logging.error(e)
-            data_err = {
-                'system_error_code': system_error_code,
-                'developer_message': developer_message
-            }
-            data = {
-                'error': {
-                    'code': system_error_code,
-                    'message': message,
-                    'data': data_err
-                }
-            }
-            resp = make_response(json.dumps(data), 404)
+        except ValueError:
+            error = AuthError.USER_FINDBYUUID_ERROR.phrase
+            error_code = AuthError.USER_FINDBYUUID_ERROR
+            developer_message = AuthError.USER_FINDBYUUID_ERROR.description
+            http_code = HTTPStatus.BAD_REQUEST
+            response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
+                                        developer_message=developer_message, error_code=error_code)
+            resp = make_response(json.dumps(response_data.serialize()), http_code)
             return resp
 
-        email = request_json[self.__email_field]
-        password = request_json[self.__password_field]
-        account_non_expired = request_json[self.__account_non_expired_field]
-        account_non_locked = request_json[self.__account_non_locked_field]
-        credentials_non_expired = request_json[self.__credentials_non_expired_field]
-        enabled = request_json[self.__enabled_field]
+        email = request_json.get(UserDB.email_field, None)
+        created_date = request_json.get(UserDB.created_date_field, None)
+        password = request_json.get(UserDB.password_field, None)
+        is_expired = request_json.get(UserDB.is_expired_field, None)
+        is_locked = request_json.get(UserDB.is_locked_field, None)
+        is_password_expired = request_json.get(UserDB.is_password_expired_field, None)
+        enabled = request_json.get(UserDB.enabled_field, None)
 
         user_db = UserDB(storage_service=self.__db_storage_service, uuid=user_uuid, email=email,
-                         password=password, account_non_expired=account_non_expired,
-                         account_non_locked=account_non_locked, credentials_non_expired=credentials_non_expired,
-                         enabled=enabled)
+                         is_password_expired=is_password_expired, password=password, created_date=created_date,
+                         is_expired=is_expired, is_locked=is_locked, enabled=enabled)
         user_db.update()
 
-        resp = make_response("", 200)
+        resp = make_response('', HTTPStatus.OK)
         resp.headers['Location'] = '%s/%s/uuid/%s' % (self._config['API_BASE_URI'], self.__api_url__, uuid)
         return resp
 
@@ -125,112 +113,89 @@ class UserAPI(ResourceAPI):
         if uuid is not None:
             try:
                 uuidlib.UUID(uuid)
-            except ValueError as e:
-                message = 'User not found'
-                developer_message = 'Bad uuid value.'
-                system_error_code = AuthError.USER_FINDBYUUID_ERROR
-                logging.error(e)
-                data_err = {
-                    'system_error_code': system_error_code,
-                    'developer_message': developer_message
-                }
-                data = {
-                    'error': {
-                        'code': system_error_code,
-                        'message': message,
-                        'data': data_err
-                    }
-                }
-                resp = make_response(json.dumps(data), 404)
+            except ValueError:
+                error = AuthError.USER_FINDBYUUID_ERROR.phrase
+                error_code = AuthError.USER_FINDBYUUID_ERROR
+                developer_message = AuthError.USER_FINDBYUUID_ERROR.description
+                http_code = HTTPStatus.BAD_REQUEST
+                response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
+                                            developer_message=developer_message, error_code=error_code)
+                resp = make_response(json.dumps(response_data.serialize()), http_code)
                 return resp
         user_db = UserDB(storage_service=self.__db_storage_service, uuid=uuid, email=email)
         if uuid is None and email is None:
             # find all user is no parameter set
             try:
                 user_list = user_db.find_all()
-                resp = make_response(json.dumps([ob.to_dict() for ob in user_list], cls=JSONDecimalEncoder), 200)
+                users_dict = {user_list[i]: user_list[i + 1] for i in range(0, len(user_list), 2)}
+                response_data = APIResponse(status=APIResponseStatus.success.value, code=HTTPStatus.OK,
+                                            data=users_dict)
+                resp = make_response(json.dumps(response_data.serialize(), cls=JSONDecimalEncoder), HTTPStatus.OK)
             except UserException as e:
                 logging.error(e)
-                code = e.code
-                message = e.message
-                data_err = e.data
-                data = {
-                    'error': {
-                        'code': code,
-                        'message': message,
-                        'data': data_err
-                    }
-                }
-                resp = make_response(json.dumps(data), 404)
-            return resp
+                http_code = HTTPStatus.BAD_REQUEST
+                error = e.error
+                error_code = e.error_code
+                developer_message = e.developer_message
+                response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
+                                            developer_message=developer_message, error_code=error_code)
+                resp = make_response(json.dumps(response_data.serialize()), http_code)
         elif uuid is not None:
             # find user by uuid
             try:
                 user = user_db.find_by_uuid()
-                resp = make_response(json.dumps(user.to_dict(), cls=JSONDecimalEncoder), 200)
+                response_data = APIResponse(status=APIResponseStatus.success.value, code=HTTPStatus.OK,
+                                            data=user.to_dict())
+                resp = make_response(json.dumps(response_data.serialize(), cls=JSONDecimalEncoder), HTTPStatus.OK)
             except UserNotFoundException as e:
                 logging.error(e)
-                code = e.code
-                message = e.message
-                data_err = e.data
-                data = {
-                    'error': {
-                        'code': code,
-                        'message': message,
-                        'data': data_err
-                    }
-                }
-                resp = make_response(json.dumps(data), 404)
+                http_code = HTTPStatus.NOT_FOUND
+                error = e.error
+                error_code = e.error_code
+                developer_message = e.developer_message
+                response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code,
+                                            developer_message=developer_message, error=error, error_code=error_code)
+                resp = make_response(json.dumps(response_data.serialize()), http_code)
+                return resp
             except UserException as e:
                 logging.error(e)
-                code = e.code
-                message = e.message
-                data_err = e.data
-                data = {
-                    'error': {
-                        'code': code,
-                        'message': message,
-                        'data': data_err
-                    }
-                }
-                resp = make_response(json.dumps(data), 500)
+                http_code = HTTPStatus.BAD_REQUEST
+                error = e.error
+                error_code = e.error_code
+                developer_message = e.developer_message
+                response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code,
+                                            developer_message=developer_message, error=error, error_code=error_code)
+                resp = make_response(json.dumps(response_data.serialize()), http_code)
         elif email is not None:
             # find user by email
             try:
                 user = user_db.find_by_email()
-                resp = make_response(json.dumps(user.to_dict(), cls=JSONDecimalEncoder), 200)
+                response_data = APIResponse(status=APIResponseStatus.success.value, code=HTTPStatus.OK,
+                                            data=user.to_dict())
+                resp = make_response(json.dumps(response_data.serialize(), cls=JSONDecimalEncoder), HTTPStatus.OK)
             except UserNotFoundException as e:
                 logging.error(e)
-                code = e.code
-                message = e.message
-                data_err = e.data
-                data = {
-                    'error': {
-                        'code': code,
-                        'message': message,
-                        'data': data_err
-                    }
-                }
-                resp = make_response(json.dumps(data), 404)
+                http_code = HTTPStatus.NOT_FOUND
+                error = e.error
+                error_code = e.error_code
+                developer_message = e.developer_message
+                response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code,
+                                            developer_message=developer_message, error=error, error_code=error_code)
+                resp = make_response(json.dumps(response_data.serialize()), http_code)
             except UserException as e:
                 logging.error(e)
-                code = e.code
-                message = e.message
-                data_err = e.data
-                data = {
-                    'error': {
-                        'code': code,
-                        'message': message,
-                        'data': data_err
-                    }
-                }
-                resp = make_response(json.dumps(data), 500)
+                http_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                error = e.error
+                error_code = e.error_code
+                developer_message = e.developer_message
+                response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code,
+                                            developer_message=developer_message, error=error, error_code=error_code)
+                resp = make_response(json.dumps(response_data.serialize()), http_code)
         else:
-            data = {
-                'error': {
-                    'code': AuthError.UNKNOWN_ERROR_CODE,
-                    'message': "UserAPI get method all parameters are null. WTF?"
-                }
-            }
-            resp = make_response(json.dumps(data), 500)
+            http_code = HTTPStatus.SERVICE_UNAVAILABLE
+            error = AuthError.UNKNOWN_ERROR_CODE.phrase
+            error_code = AuthError.UNKNOWN_ERROR_CODE
+            response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
+                                        error_code=error_code)
+            resp = make_response(json.dumps(response_data.serialize()), http_code)
         return resp
