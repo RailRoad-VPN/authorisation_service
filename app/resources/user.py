@@ -15,7 +15,7 @@ from storage_service import DBStorageService
 sys.path.insert(1, '../rest_api_library')
 from utils import JSONDecimalEncoder
 from api import ResourceAPI
-from services.response import APIResponseStatus, APIResponse
+from response import APIResponseStatus, APIResponse
 
 
 class UserAPI(ResourceAPI):
