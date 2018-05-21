@@ -15,7 +15,7 @@ from storage_service import StorageService
 class User(object):
     __version__ = 1
 
-    _uuid = None
+    _suuid = None
     _email = None
     _created_date = None
     _password = None
@@ -24,10 +24,10 @@ class User(object):
     _is_password_expired = None
     _enabled = None
 
-    def __init__(self, uuid: str = None, email: str = None, created_date: datetime = None, password: str = None,
+    def __init__(self, suuid: str = None, email: str = None, created_date: datetime = None, password: str = None,
                  is_expired: bool = None, is_locked: bool = None,
                  is_password_expired: bool = None, enabled: bool = None):
-        self._uuid = uuid
+        self._suuid = suuid
         self._email = email
         self._created_date = created_date
         self._password = password
@@ -38,7 +38,7 @@ class User(object):
 
     def to_dict(self):
         return {
-            'uuid': self._uuid,
+            'suuid': self._suuid,
             'email': self._email,
             'created_date': self._created_date,
             'password': self._password,
@@ -63,7 +63,7 @@ class UserStored(User):
 class UserDB(UserStored):
     __version__ = 1
 
-    _uuid_field = 'uuid'
+    _suuid_field = 'uuid'
     _email_field = 'email'
     _created_date_field = 'created_date'
     _password_field = 'password'
@@ -73,8 +73,8 @@ class UserDB(UserStored):
     _enabled_field = 'enabled'
 
     @property
-    def uuid_field(self):
-        return type(self)._uuid_field
+    def suuid_field(self):
+        return type(self)._suuid_field
 
     @property
     def email_field(self):
@@ -104,16 +104,16 @@ class UserDB(UserStored):
     def enabled_field(self):
         return type(self)._enabled_field
 
-    def __init__(self, **kwargs: dict) -> None:
+    def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
     def create(self) -> str:
-        self._uuid = uuidlib.uuid4()
-        logging.info('Create object User with uuid: ' + str(self._uuid))
+        self._suuid = uuidlib.uuid4()
+        logging.info('Create object User with uuid: ' + str(self._suuid))
         create_user_sql = 'INSERT INTO public."user" (uuid, email, password, enabled, is_expired, ' \
                           'is_locked, is_password_expired) VALUES (?, ?, ?, ?, ?, ?, ?)'
         create_user_params = (
-            self._uuid,
+            self._suuid,
             self._email,
             self._password,
             self._enabled,
@@ -141,10 +141,9 @@ class UserDB(UserStored):
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
         logging.debug('User created.')
 
-        return self._uuid
+        return self._suuid
 
     def update(self):
-        # TODO update user social network
         logging.info('Update User')
 
         update_sql = '''
@@ -163,7 +162,7 @@ class UserDB(UserStored):
 
         params = (
             self._email, self._password, self._enabled, self._is_expired,
-            self._is_locked, self._is_password_expired, self._uuid
+            self._is_locked, self._is_password_expired, self._suuid
         )
 
         try:
@@ -182,11 +181,11 @@ class UserDB(UserStored):
             error_code = AuthError.USER_UPDATE_ERROR_DB.value
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
 
-    def find_by_uuid(self) -> Optional[User]:
+    def find_by_suuid(self) -> Optional[User]:
         logging.info('Find User by uuid')
         select_sql = 'SELECT * FROM public."user" WHERE uuid = ?'
         logging.debug('Select SQL: %s' % select_sql)
-        params = (self._uuid,)
+        params = (self._suuid,)
 
         try:
             logging.debug('Call database service')
@@ -275,12 +274,8 @@ class UserDB(UserStored):
         return user_list
 
     def __map_userdb_to_user(self, user_db):
-        self._uuid = user_db[self._uuid_field]
-        return User(uuid=self._uuid,
-                    email=user_db[self._email_field],
-                    is_expired=user_db[self._is_expired_field],
-                    is_locked=user_db[self._is_locked_field],
+        return User(suuid=user_db[self._suuid_field], email=user_db[self._email_field],
+                    is_expired=user_db[self._is_expired_field], is_locked=user_db[self._is_locked_field],
                     is_password_expired=user_db[self._is_password_expired_field],
-                    created_date=user_db[self._created_date_field],
-                    password=user_db[self._password_field],
+                    created_date=user_db[self._created_date_field], password=user_db[self._password_field],
                     enabled=user_db[self._enabled_field])

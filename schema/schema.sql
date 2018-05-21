@@ -23,5 +23,6 @@ CREATE TABLE public.user
   , is_expired BOOLEAN DEFAULT FALSE NOT NULL
   , is_locked  BOOLEAN DEFAULT FALSE NOT NULL
   , is_password_expired BOOLEAN DEFAULT FALSE NOT NULL
-  , created_date TIMESTAMP DEFAULT now()
+  , created_date timestamptz NOT NULL DEFAULT now()
+  , modife_date timestamptz NOT NULL DEFAULT now()
 );
