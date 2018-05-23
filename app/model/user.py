@@ -38,7 +38,7 @@ class User(object):
 
     def to_dict(self):
         return {
-            'suuid': self._suuid,
+            'uuid': self._suuid,
             'email': self._email,
             'created_date': self._created_date,
             'password': self._password,
@@ -54,7 +54,7 @@ class UserStored(User):
 
     _storage_service = None
 
-    def __init__(self, storage_service: StorageService, **kwargs: dict) -> None:
+    def __init__(self, storage_service: StorageService, **kwargs) -> None:
         super().__init__(**kwargs)
 
         self._storage_service = storage_service

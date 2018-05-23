@@ -13,7 +13,7 @@ sys.path.insert(0, '../psql_library')
 from storage_service import DBStorageService
 
 sys.path.insert(1, '../rest_api_library')
-from utils import JSONDecimalEncoder
+from utils import JSONDecimalEncoder, check_uuid
 from api import ResourceAPI
 from response import APIResponseStatus, APIResponse
 
@@ -64,7 +64,7 @@ class UserAPI(ResourceAPI):
             return make_response(json.dumps(response_data.serialize()), http_code)
 
         resp = make_response('', HTTPStatus.CREATED)
-        resp.headers['Location'] = '%s/%s/suuid/%s' % (self._config['API_BASE_URI'], self.__api_url__, suuid)
+        resp.headers['Location'] = '%s/%s/uuid/%s' % (self._config['API_BASE_URI'], self.__api_url__, suuid)
         return resp
 
     def put(self, suuid: str = None) -> Response:
@@ -80,9 +80,9 @@ class UserAPI(ResourceAPI):
             resp = make_response(json.dumps(response_data.serialize()), http_code)
             return resp
 
-        try:
-            uuid.UUID(user_uuid)
-        except ValueError:
+        is_valid = check_uuid(suuid=user_uuid)
+        is_valid_b = check_uuid(suuid=suuid)
+        if not is_valid or not is_valid_b:
             error = AuthError.USER_FINDBYUUID_ERROR.phrase
             error_code = AuthError.USER_FINDBYUUID_ERROR
             developer_message = AuthError.USER_FINDBYUUID_ERROR.description
@@ -106,14 +106,13 @@ class UserAPI(ResourceAPI):
         user_db.update()
 
         resp = make_response('', HTTPStatus.OK)
-        resp.headers['Location'] = '%s/%s/suuid/%s' % (self._config['API_BASE_URI'], self.__api_url__, suuid)
+        resp.headers['Location'] = '%s/%s/uuid/%s' % (self._config['API_BASE_URI'], self.__api_url__, suuid)
         return resp
 
     def get(self, suuid: str = None, email: str = None) -> Response:
         if suuid is not None:
-            try:
-                uuid.UUID(suuid)
-            except ValueError:
+            is_valid = check_uuid(suuid=suuid)
+            if not is_valid:
                 error = AuthError.USER_FINDBYUUID_ERROR.phrase
                 error_code = AuthError.USER_FINDBYUUID_ERROR
                 developer_message = AuthError.USER_FINDBYUUID_ERROR.description
@@ -127,9 +126,8 @@ class UserAPI(ResourceAPI):
             # find all user is no parameter set
             try:
                 user_list = user_db.find_all()
-                users_dict = {user_list[i]: user_list[i + 1] for i in range(0, len(user_list), 2)}
-                response_data = APIResponse(status=APIResponseStatus.success.value, code=HTTPStatus.OK,
-                                            data=users_dict)
+                users_dict = [user_list[i].to_dict() for i in range(0, len(user_list))]
+                response_data = APIResponse(status=APIResponseStatus.success.value, code=HTTPStatus.OK, data=users_dict)
                 resp = make_response(json.dumps(response_data.serialize(), cls=JSONDecimalEncoder), HTTPStatus.OK)
             except UserException as e:
                 logging.error(e)
