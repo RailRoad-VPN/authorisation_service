@@ -72,7 +72,12 @@ class UserDB(UserStored):
     _is_password_expired_field = 'is_password_expired'
     _enabled_field = 'enabled'
 
-    def __init__(self, **kwargs) -> None:
+    __limit = None
+    __offset = None
+
+    def __init__(self, limit: int = None, offset: int = None, **kwargs):
+        self.__limit = limit
+        self.__offset = offset
         super().__init__(**kwargs)
 
     def create(self) -> str:
