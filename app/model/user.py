@@ -72,46 +72,26 @@ class UserDB(UserStored):
     _is_password_expired_field = 'is_password_expired'
     _enabled_field = 'enabled'
 
-    @property
-    def suuid_field(self):
-        return type(self)._suuid_field
-
-    @property
-    def email_field(self):
-        return type(self)._email_field
-
-    @property
-    def created_date_field(self):
-        return type(self)._created_date_field
-
-    @property
-    def password_field(self):
-        return type(self)._password_field
-
-    @property
-    def is_expired_field(self):
-        return type(self)._is_expired_field
-
-    @property
-    def is_locked_field(self):
-        return type(self)._is_locked_field
-
-    @property
-    def is_password_expired_field(self):
-        return type(self)._is_password_expired_field
-
-    @property
-    def enabled_field(self):
-        return type(self)._enabled_field
-
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
     def create(self) -> str:
         self._suuid = uuidlib.uuid4()
         logging.info('Create object User with uuid: ' + str(self._suuid))
-        create_user_sql = 'INSERT INTO public."user" (uuid, email, password, enabled, is_expired, ' \
-                          'is_locked, is_password_expired) VALUES (?, ?, ?, ?, ?, ?, ?)'
+        create_user_sql = '''
+                          INSERT INTO public."user" 
+                            (
+                                uuid, 
+                                email, 
+                                password, 
+                                enabled, 
+                                is_expired, 
+                                is_locked, 
+                                is_password_expired
+                            ) 
+                          VALUES 
+                            (?, ?, ?, ?, ?, ?, ?)
+        '''
         create_user_params = (
             self._suuid,
             self._email,
@@ -147,10 +127,12 @@ class UserDB(UserStored):
         logging.info('Update User')
 
         update_sql = '''
-                    UPDATE public."user" 
-                    SET email = ?,
-                      enabled = ?,
+                    UPDATE 
+                      public."user" 
+                    SET 
+                      email = ?,
                       password = ?, 
+                      enabled = ?,
                       is_expired = ?, 
                       is_locked = ?, 
                       is_password_expired = ?
@@ -161,8 +143,13 @@ class UserDB(UserStored):
         logging.debug('Update SQL: %s' % update_sql)
 
         params = (
-            self._email, self._password, self._enabled, self._is_expired,
-            self._is_locked, self._is_password_expired, self._suuid
+            self._email,
+            self._password,
+            self._enabled,
+            self._is_expired,
+            self._is_locked,
+            self._is_password_expired,
+            self._suuid
         )
 
         try:
@@ -183,7 +170,21 @@ class UserDB(UserStored):
 
     def find_by_suuid(self) -> Optional[User]:
         logging.info('Find User by uuid')
-        select_sql = 'SELECT * FROM public."user" WHERE uuid = ?'
+        select_sql = '''
+                        SELECT 
+                            uuid,
+                            email,
+                            to_json(created_date) AS created_date,
+                            password,
+                            is_expired,
+                            is_locked,
+                            is_password_expired,
+                            enabled 
+                        FROM 
+                            public."user" 
+                        WHERE 
+                            uuid = ?
+                    '''
         logging.debug('Select SQL: %s' % select_sql)
         params = (self._suuid,)
 
@@ -216,7 +217,21 @@ class UserDB(UserStored):
 
     def find_by_email(self) -> Optional[User]:
         logging.info('Find User by email')
-        select_sql = 'SELECT * FROM public."user" WHERE email = ?'
+        select_sql = '''
+                        SELECT 
+                            uuid,
+                            email,
+                            to_json(created_date) AS created_date,
+                            password,
+                            is_expired,
+                            is_locked,
+                            is_password_expired,
+                            enabled 
+                        FROM 
+                            public."user" 
+                        WHERE 
+                            email = ?
+                    '''
         logging.debug('Select SQL: %s' % select_sql)
         params = (self._email,)
 
@@ -249,7 +264,19 @@ class UserDB(UserStored):
 
     def find_all(self) -> Optional[List[User]]:
         logging.info('Find all Users')
-        select_sql = 'SELECT * FROM public."user"'
+        select_sql = '''
+                        SELECT 
+                            uuid,
+                            email,
+                            to_json(created_date) AS created_date,
+                            password,
+                            is_expired,
+                            is_locked,
+                            is_password_expired,
+                            enabled 
+                        FROM 
+                            public."user" 
+                    '''
         logging.debug('Select SQL: %s' % select_sql)
 
         try:
