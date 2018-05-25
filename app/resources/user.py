@@ -129,7 +129,7 @@ class UserAPI(ResourceAPI):
             # find all user is no parameter set
             try:
                 user_list = user_db.find_all()
-                users_dict = [user_list[i].to_dict() for i in range(0, len(user_list))]
+                users_dict = [user_list[i].to_api_dict() for i in range(0, len(user_list))]
                 response_data = APIResponse(status=APIResponseStatus.success.value, code=HTTPStatus.OK, data=users_dict,
                                             limit=self.pagination.limit, offset=self.pagination.offset)
                 resp = make_api_response(json.dumps(response_data.serialize(), cls=JSONDecimalEncoder), HTTPStatus.OK)
@@ -149,7 +149,7 @@ class UserAPI(ResourceAPI):
             try:
                 user = user_db.find_by_suuid()
                 response_data = APIResponse(status=APIResponseStatus.success.value, code=HTTPStatus.OK,
-                                            data=user.to_dict())
+                                            data=user.to_api_dict())
                 resp = make_api_response(json.dumps(response_data.serialize(), cls=JSONDecimalEncoder), HTTPStatus.OK)
                 return resp
             except UserNotFoundException as e:
@@ -177,7 +177,7 @@ class UserAPI(ResourceAPI):
             try:
                 user = user_db.find_by_email()
                 response_data = APIResponse(status=APIResponseStatus.success.value, code=HTTPStatus.OK,
-                                            data=user.to_dict())
+                                            data=user.to_api_dict())
                 resp = make_api_response(json.dumps(response_data.serialize(), cls=JSONDecimalEncoder), HTTPStatus.OK)
                 return resp
             except UserNotFoundException as e:

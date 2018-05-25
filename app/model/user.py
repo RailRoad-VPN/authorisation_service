@@ -9,7 +9,7 @@ from psycopg2._psycopg import DatabaseError
 from app.exception import UserException, AuthError, UserNotFoundException
 
 sys.path.insert(0, '../psql_library')
-from storage_service import StorageService
+from storage_service import StorageService, StoredObject
 
 
 class User(object):
@@ -48,16 +48,29 @@ class User(object):
             'enabled': self._enabled,
         }
 
+    def to_api_dict(self):
+        return {
+            'uuid': self._suuid,
+            'email': self._email,
+            'password': self._password,
+            'is_expired': self._is_expired,
+            'is_locked': self._is_locked,
+            'is_password_expired': self._is_password_expired,
+            'enabled': self._enabled,
+        }
 
-class UserStored(User):
+
+class UserStored(StoredObject, User):
     __version__ = 1
 
-    _storage_service = None
-
-    def __init__(self, storage_service: StorageService, **kwargs) -> None:
-        super().__init__(**kwargs)
-
-        self._storage_service = storage_service
+    def __init__(self, storage_service: StorageService, suuid: str = None, email: str = None,
+                 created_date: datetime = None, password: str = None, is_expired: bool = None, is_locked: bool = None,
+                 is_password_expired: bool = None, enabled: bool = None, limit: int = None, offset: int = None,
+                 **kwargs):
+        StoredObject.__init__(self, storage_service=storage_service, limit=limit, offset=offset)
+        User.__init__(self, suuid=suuid, email=email, created_date=created_date, password=password,
+                      is_expired=is_expired, is_locked=is_locked, is_password_expired=is_password_expired,
+                      enabled=enabled)
 
 
 class UserDB(UserStored):
@@ -72,12 +85,7 @@ class UserDB(UserStored):
     _is_password_expired_field = 'is_password_expired'
     _enabled_field = 'enabled'
 
-    __limit = None
-    __offset = None
-
-    def __init__(self, limit: int = None, offset: int = None, **kwargs):
-        self.__limit = limit
-        self.__offset = offset
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def create(self) -> str:
@@ -282,6 +290,8 @@ class UserDB(UserStored):
                         FROM 
                             public."user" 
                     '''
+        if self.__limit:
+            select_sql += "LIMIT %s\nOFFSET %s" % (self.__limit, self.__offset)
         logging.debug('Select SQL: %s' % select_sql)
 
         try:
