@@ -3,8 +3,9 @@ import os
 from pprint import pprint
 
 import sys
-from flask import Flask
+from flask import Flask, request
 
+from api import register_api
 from app.resources.user import UserAPI
 
 sys.path.insert(0, '../psql_library')
@@ -22,17 +23,18 @@ config_name = "%s.%s" % ('config', ENVIRONMENT_CONFIG)
 logging.info("Config name: %s" % config_name)
 app.config.from_object(config_name)
 
+app_config = app.config
+api_base_uri = app_config['API_BASE_URI']
+
 with app.app_context():
     psql = PostgreSQL(app=app)
 
 db_storage_service = DBStorageService(psql=psql)
 
-# USER API
-user_api_url = '%s/%s' % (app.config['API_BASE_URI'], UserAPI.__api_url__)
-user_api_view_func = UserAPI.as_view('user_api', db_storage_service, app.config)
-app.add_url_rule(user_api_url, view_func=user_api_view_func, methods=['GET', 'POST'])
-app.add_url_rule('%s/<string:suuid>' % user_api_url, view_func=user_api_view_func, methods=['PUT'])
-app.add_url_rule('%s/uuid/<string:suuid>' % user_api_url, view_func=user_api_view_func, methods=['GET'])
-app.add_url_rule('%s/email/<string:email>' % user_api_url, view_func=user_api_view_func, methods=['GET'])
+apis = [
+    {'cls': UserAPI, 'args': [db_storage_service, app_config]},
+]
+
+register_api(app, api_base_uri, apis)
 
 pprint(app.url_map._rules_by_endpoint)

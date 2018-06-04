@@ -38,7 +38,7 @@ class User(object):
 
     def to_dict(self):
         return {
-            'uuid': self._suuid,
+            'uuid': str(self._suuid),
             'email': self._email,
             'created_date': self._created_date,
             'password': self._password,
@@ -50,7 +50,7 @@ class User(object):
 
     def to_api_dict(self):
         return {
-            'uuid': self._suuid,
+            'uuid': str(self._suuid),
             'email': self._email,
             'password': self._password,
             'is_expired': self._is_expired,
