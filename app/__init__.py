@@ -1,16 +1,18 @@
 import logging
 import os
+import sys
 from pprint import pprint
 
-import sys
-from flask import Flask, request
+from flask import Flask
 
-from api import register_api
 from app.resources.user import UserAPI
 
 sys.path.insert(0, '../psql_library')
 from psql_helper import PostgreSQL
 from storage_service import DBStorageService
+
+sys.path.insert(1, '../rest_api_library')
+from api import register_api
 
 logging.basicConfig(level=logging.DEBUG)
 
