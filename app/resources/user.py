@@ -66,10 +66,7 @@ class UserAPI(ResourceAPI):
             error_code = e.error_code
             error = e.error
             developer_message = e.developer_message
-            if error_code == AuthError.USER_CREATE_ERROR_DB:
-                http_code = HTTPStatus.BAD_REQUEST
-            else:
-                http_code = HTTPStatus.INTERNAL_SERVER_ERROR
+            http_code = HTTPStatus.BAD_REQUEST
             response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
                                         developer_message=developer_message, error_code=error_code)
             return make_api_response(data=response_data, http_code=http_code)
@@ -86,9 +83,9 @@ class UserAPI(ResourceAPI):
         is_valid = check_uuid(suuid=user_uuid)
         is_valid_b = check_uuid(suuid=suuid)
         if not is_valid or not is_valid_b or suuid != user_uuid:
-            error = AuthError.USER_FINDBYUUID_ERROR.phrase
-            error_code = AuthError.USER_FINDBYUUID_ERROR
-            developer_message = AuthError.USER_FINDBYUUID_ERROR.description
+            error = AuthError.USER_FINDBYUUID_ERROR.message
+            error_code = AuthError.USER_FINDBYUUID_ERROR.code
+            developer_message = AuthError.USER_FINDBYUUID_ERROR.developer_message
             http_code = HTTPStatus.BAD_REQUEST
             response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
                                         developer_message=developer_message, error_code=error_code)
@@ -128,9 +125,9 @@ class UserAPI(ResourceAPI):
         if suuid is not None:
             is_valid = check_uuid(suuid=suuid)
             if not is_valid:
-                error = AuthError.USER_FINDBYUUID_ERROR.phrase
-                error_code = AuthError.USER_FINDBYUUID_ERROR
-                developer_message = AuthError.USER_FINDBYUUID_ERROR.description
+                error = AuthError.USER_FINDBYUUID_ERROR.message
+                error_code = AuthError.USER_FINDBYUUID_ERROR.code
+                developer_message = AuthError.USER_FINDBYUUID_ERROR.developer_message
                 http_code = HTTPStatus.BAD_REQUEST
                 response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
                                             developer_message=developer_message, error_code=error_code)
@@ -215,9 +212,10 @@ class UserAPI(ResourceAPI):
                 return resp
         else:
             http_code = HTTPStatus.SERVICE_UNAVAILABLE
-            error = AuthError.UNKNOWN_ERROR_CODE.phrase
-            error_code = AuthError.UNKNOWN_ERROR_CODE
+            error = AuthError.UNKNOWN_ERROR_CODE.message
+            error_code = AuthError.UNKNOWN_ERROR_CODE.code
+            developer_message = AuthError.UNKNOWN_ERROR_CODE.developer_message
             response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
-                                        error_code=error_code)
+                                        error_code=error_code, developer_message=developer_message)
             resp = make_api_response(data=response_data, http_code=http_code)
             return resp

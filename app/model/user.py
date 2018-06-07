@@ -126,10 +126,10 @@ class UserDB(UserStored):
                 e = e.args[0]
             except IndexError:
                 pass
-            error_message = AuthError.USER_CREATE_ERROR_DB.phrase
-            error_code = AuthError.USER_CREATE_ERROR_DB.value
+            error_message = AuthError.USER_CREATE_ERROR_DB.message
+            error_code = AuthError.USER_CREATE_ERROR_DB.code
             developer_message = "%s. DatabaseError. Something wrong with database or SQL is broken. " \
-                                "Code: %s . %s" % (AuthError.USER_CREATE_ERROR_DB.description, e.pgcode, e.pgerror)
+                                "Code: %s . %s" % (AuthError.USER_CREATE_ERROR_DB.developer_message, e.pgcode, e.pgerror)
 
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
         logging.debug('User created.')
@@ -175,10 +175,10 @@ class UserDB(UserStored):
                 e = e.args[0]
             except IndexError:
                 pass
-            error_message = AuthError.USER_UPDATE_ERROR_DB.phrase
+            error_message = AuthError.USER_UPDATE_ERROR_DB.message
             developer_message = "%s. DatabaseError. Something wrong with database or SQL is broken. " \
                                 "Code: %s . %s" % (AuthError.USER_UPDATE_ERROR_DB.description, e.pgcode, e.pgerror)
-            error_code = AuthError.USER_UPDATE_ERROR_DB.value
+            error_code = AuthError.USER_UPDATE_ERROR_DB.code
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
 
     def find_by_suuid(self) -> Optional[User]:
@@ -206,8 +206,8 @@ class UserDB(UserStored):
             user_list_db = self._storage_service.get(select_sql, params)
         except DatabaseError as e:
             logging.error(e)
-            error_message = AuthError.USER_FINDBYUUID_ERROR_DB.phrase
-            error_code = AuthError.USER_FINDBYUUID_ERROR_DB.value
+            error_message = AuthError.USER_FINDBYUUID_ERROR_DB.message
+            error_code = AuthError.USER_FINDBYUUID_ERROR_DB.code
             developer_message = "%s. DatabaseError. Something wrong with database or SQL is broken. " \
                                 "Code: %s . %s" % (AuthError.USER_FINDBYUUID_ERROR_DB.description, e.pgcode, e.pgerror)
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
@@ -215,15 +215,15 @@ class UserDB(UserStored):
         if len(user_list_db) == 1:
             user_db = user_list_db[0]
         elif len(user_list_db) == 0:
-            error_message = AuthError.USER_FINDBYUUID_ERROR.phrase
-            error_code = AuthError.USER_FINDBYUUID_ERROR.value
+            error_message = AuthError.USER_FINDBYUUID_ERROR.message
+            error_code = AuthError.USER_FINDBYUUID_ERROR.code
             developer_message = AuthError.USER_FINDBYUUID_ERROR.description
             raise UserNotFoundException(error=error_message, error_code=error_code, developer_message=developer_message)
         else:
-            error_message = AuthError.USER_FINDBYUUID_ERROR.phrase
+            error_message = AuthError.USER_FINDBYUUID_ERROR.message
             developer_message = "%s. Find by specified uuid return more than 1 object. This is CAN NOT be! Something " \
                                 "really bad with database." % AuthError.USER_FINDBYUUID_ERROR.description
-            error_code = AuthError.USER_FINDBYUUID_ERROR.value
+            error_code = AuthError.USER_FINDBYUUID_ERROR.code
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
 
         return self.__map_userdb_to_user(user_db)
@@ -253,8 +253,8 @@ class UserDB(UserStored):
             user_list_db = self._storage_service.get(select_sql, params)
         except DatabaseError as e:
             logging.error(e)
-            error_message = AuthError.USER_FINDBYEMAIL_ERROR_DB.phrase
-            error_code = AuthError.USER_FINDBYEMAIL_ERROR_DB.value
+            error_message = AuthError.USER_FINDBYEMAIL_ERROR_DB.message
+            error_code = AuthError.USER_FINDBYEMAIL_ERROR_DB.code
             developer_message = "%s. DatabaseError. Something wrong with database or SQL is broken. " \
                                 "Code: %s . %s" % (AuthError.USER_FINDBYEMAIL_ERROR_DB.description, e.pgcode, e.pgerror)
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
@@ -262,15 +262,15 @@ class UserDB(UserStored):
         if len(user_list_db) == 1:
             user_db = user_list_db[0]
         elif len(user_list_db) == 0:
-            error_message = AuthError.USER_FINDBYEMAIL_ERROR.phrase
-            error_code = AuthError.USER_FINDBYEMAIL_ERROR.value
+            error_message = AuthError.USER_FINDBYEMAIL_ERROR.message
+            error_code = AuthError.USER_FINDBYEMAIL_ERROR.code
             developer_message = AuthError.USER_FINDBYEMAIL_ERROR.description
             raise UserNotFoundException(error=error_message, error_code=error_code, developer_message=developer_message)
         else:
-            error_message = AuthError.USER_FINDBYEMAIL_ERROR.phrase
+            error_message = AuthError.USER_FINDBYEMAIL_ERROR.message
             developer_message = "%s. Find by specified email return more than 1 object. This is CAN NOT be! Something " \
                                 "really bad with database." % AuthError.USER_FINDBYEMAIL_ERROR.description
-            error_code = AuthError.USER_FINDBYEMAIL_ERROR.value
+            error_code = AuthError.USER_FINDBYEMAIL_ERROR.code
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
 
         return self.__map_userdb_to_user(user_db)
@@ -290,8 +290,8 @@ class UserDB(UserStored):
                         FROM 
                             public."user" 
                     '''
-        if self.__limit:
-            select_sql += "LIMIT %s\nOFFSET %s" % (self.__limit, self.__offset)
+        if self._limit:
+            select_sql += "LIMIT %s\nOFFSET %s" % (self._limit, self._offset)
         logging.debug('Select SQL: %s' % select_sql)
 
         try:
@@ -299,8 +299,8 @@ class UserDB(UserStored):
             user_db_list = self._storage_service.get(select_sql)
         except DatabaseError as e:
             logging.error(e)
-            error_message = AuthError.USER_FINDALL_ERROR_DB.phrase
-            error_code = AuthError.USER_FINDALL_ERROR_DB.value
+            error_message = AuthError.USER_FINDALL_ERROR_DB.message
+            error_code = AuthError.USER_FINDALL_ERROR_DB.code
             developer_message = "%s. DatabaseError. Something wrong with database or SQL is broken. " \
                                 "Code: %s . %s" % (AuthError.USER_FINDALL_ERROR_DB.description, e.pgcode, e.pgerror)
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
