@@ -29,10 +29,13 @@ class AuthError(Enum):
     UNKNOWN_ERROR_CODE = (name + str(count()), 'UNKNOWN_ERROR_CODE phrase', 'UNKNOWN_ERROR_CODE description')
 
     USER_UPDATE_ERROR_DB = (name + str(count()), 'USER_UPDATE_ERROR_DB phrase', 'USER_UPDATE_ERROR_DB description')
-    USER_FINDBYUUID_ERROR_DB = (name + str(count()), 'USER_FINDBYUUID_ERROR_DB phrase', 'USER_FINDBYUUID_ERROR_DB description')
+    USER_FINDBYUUID_ERROR_DB = (
+    name + str(count()), 'USER_FINDBYUUID_ERROR_DB phrase', 'USER_FINDBYUUID_ERROR_DB description')
     USER_FINDBYUUID_ERROR = (name + str(count()), 'USER_FINDBYUUID_ERROR phrase', 'USER_FINDBYUUID_ERROR description')
-    USER_FINDBYEMAIL_ERROR_DB = (name + str(count()), 'USER_FINDBYEMAIL_ERROR_DB phrase', 'USER_FINDBYEMAIL_ERROR_DB description')
-    USER_FINDBYEMAIL_ERROR = (name + str(count()), 'USER_FINDBYEMAIL_ERROR phrase', 'USER_FINDBYEMAIL_ERROR description')
+    USER_FINDBYEMAIL_ERROR_DB = (
+    name + str(count()), 'USER_FINDBYEMAIL_ERROR_DB phrase', 'USER_FINDBYEMAIL_ERROR_DB description')
+    USER_FINDBYEMAIL_ERROR = (
+    name + str(count()), 'USER_FINDBYEMAIL_ERROR phrase', 'USER_FINDBYEMAIL_ERROR description')
     USER_FINDALL_ERROR_DB = (name + str(count()), 'USER_FINDALL_ERROR_DB phrase', 'USER_FINDALL_ERROR_DB description')
     USER_CREATE_ERROR_DB = (name + str(count()), 'USER_CREATE_ERROR_DB phrase', 'USER_CREATE_ERROR_DB description')
 

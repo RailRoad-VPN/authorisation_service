@@ -129,7 +129,8 @@ class UserDB(UserStored):
             error_message = AuthError.USER_CREATE_ERROR_DB.message
             error_code = AuthError.USER_CREATE_ERROR_DB.code
             developer_message = "%s. DatabaseError. Something wrong with database or SQL is broken. " \
-                                "Code: %s . %s" % (AuthError.USER_CREATE_ERROR_DB.developer_message, e.pgcode, e.pgerror)
+                                "Code: %s . %s" % (
+                                AuthError.USER_CREATE_ERROR_DB.developer_message, e.pgcode, e.pgerror)
 
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
         logging.debug('User created.')
