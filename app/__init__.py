@@ -1,19 +1,20 @@
 import logging
 import os
 import sys
+from http import HTTPStatus
 from pprint import pprint
 
 from flask import Flask, request
 
 from app.exception import AuthError
 from app.resources.user import UserAPI
-from utils import make_error_request_response
 
 sys.path.insert(0, '../psql_library')
 from psql_helper import PostgreSQL
 from storage_service import DBStorageService
 
 sys.path.insert(1, '../rest_api_library')
+from utils import make_error_request_response
 from api import register_api
 
 logging.basicConfig(level=logging.DEBUG)
@@ -47,14 +48,19 @@ def wants_json_response():
            request.accept_mimetypes['text/html']
 
 
+@app.errorhandler(400)
+def not_found_error(error):
+    return make_error_request_response(HTTPStatus.BAD_REQUEST)
+
+
 @app.errorhandler(404)
 def not_found_error(error):
-    return make_error_request_response(404)
+    return make_error_request_response(HTTPStatus.NOT_FOUND)
 
 
 @app.errorhandler(500)
 def internal_error(error):
-    return make_error_request_response(500)
+    return make_error_request_response(HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 pprint(app.url_map._rules_by_endpoint)

@@ -83,7 +83,7 @@ class UserAPI(ResourceAPI):
         is_valid = check_uuid(suuid=user_uuid)
         is_valid_b = check_uuid(suuid=suuid)
         if not is_valid or not is_valid_b or suuid != user_uuid:
-            return make_error_request_response(HTTPStatus.BAD_REQUEST, error=AuthError.USER_FINDBYUUID_ERROR)
+            return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.USER_FINDBYUUID_ERROR)
 
         email = request_json.get(UserDB._email_field, None)
         password = request_json.get(UserDB._password_field, None)
@@ -118,7 +118,7 @@ class UserAPI(ResourceAPI):
         if suuid is not None:
             is_valid = check_uuid(suuid=suuid)
             if not is_valid:
-                return make_error_request_response(HTTPStatus.BAD_REQUEST, error=AuthError.USER_FINDBYUUID_ERROR)
+                return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.USER_FINDBYUUID_ERROR)
 
         user_db = UserDB(storage_service=self.__db_storage_service, suuid=suuid, email=email,
                          limit=self.pagination.limit, offset=self.pagination.offset)
@@ -198,4 +198,4 @@ class UserAPI(ResourceAPI):
                 resp = make_api_response(data=response_data, http_code=http_code)
                 return resp
         else:
-            return make_error_request_response(HTTPStatus.BAD_REQUEST, error=AuthError.UNKNOWN_ERROR_CODE)
+            return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.UNKNOWN_ERROR_CODE)
