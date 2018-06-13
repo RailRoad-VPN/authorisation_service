@@ -3,9 +3,11 @@ import os
 import sys
 from pprint import pprint
 
-from flask import Flask
+from flask import Flask, request
 
+from app.exception import AuthError
 from app.resources.user import UserAPI
+from utils import make_error_request_response
 
 sys.path.insert(0, '../psql_library')
 from psql_helper import PostgreSQL
@@ -38,5 +40,21 @@ apis = [
 ]
 
 register_api(app, api_base_uri, apis)
+
+
+def wants_json_response():
+    return request.accept_mimetypes['application/json'] >= \
+           request.accept_mimetypes['text/html']
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return make_error_request_response(404)
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    return make_error_request_response(500)
+
 
 pprint(app.url_map._rules_by_endpoint)

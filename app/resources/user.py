@@ -12,7 +12,7 @@ sys.path.insert(0, '../psql_library')
 from storage_service import DBStorageService
 
 sys.path.insert(1, '../rest_api_library')
-from utils import check_uuid, make_api_response
+from utils import check_uuid, make_api_response, make_error_request_response
 from api import ResourceAPI
 from response import APIResponseStatus, APIResponse
 from rest import APIResourceURL
@@ -67,7 +67,7 @@ class UserAPI(ResourceAPI):
             error = e.error
             developer_message = e.developer_message
             http_code = HTTPStatus.BAD_REQUEST
-            response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
+            response_data = APIResponse(status=APIResponseStatus.failed.status, code=http_code, error=error,
                                         developer_message=developer_message, error_code=error_code)
             return make_api_response(data=response_data, http_code=http_code)
 
@@ -83,14 +83,7 @@ class UserAPI(ResourceAPI):
         is_valid = check_uuid(suuid=user_uuid)
         is_valid_b = check_uuid(suuid=suuid)
         if not is_valid or not is_valid_b or suuid != user_uuid:
-            error = AuthError.USER_FINDBYUUID_ERROR.message
-            error_code = AuthError.USER_FINDBYUUID_ERROR.code
-            developer_message = AuthError.USER_FINDBYUUID_ERROR.developer_message
-            http_code = HTTPStatus.BAD_REQUEST
-            response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
-                                        developer_message=developer_message, error_code=error_code)
-            resp = make_api_response(data=response_data, http_code=http_code)
-            return resp
+            return make_error_request_response(HTTPStatus.BAD_REQUEST, error=AuthError.USER_FINDBYUUID_ERROR)
 
         email = request_json.get(UserDB._email_field, None)
         password = request_json.get(UserDB._password_field, None)
@@ -111,7 +104,7 @@ class UserAPI(ResourceAPI):
             error = e.error
             error_code = e.error_code
             developer_message = e.developer_message
-            response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
+            response_data = APIResponse(status=APIResponseStatus.failed.status, code=http_code, error=error,
                                         developer_message=developer_message, error_code=error_code)
             resp = make_api_response(data=response_data, http_code=http_code)
             return resp
@@ -125,14 +118,8 @@ class UserAPI(ResourceAPI):
         if suuid is not None:
             is_valid = check_uuid(suuid=suuid)
             if not is_valid:
-                error = AuthError.USER_FINDBYUUID_ERROR.message
-                error_code = AuthError.USER_FINDBYUUID_ERROR.code
-                developer_message = AuthError.USER_FINDBYUUID_ERROR.developer_message
-                http_code = HTTPStatus.BAD_REQUEST
-                response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
-                                            developer_message=developer_message, error_code=error_code)
-                resp = make_api_response(data=response_data, http_code=http_code)
-                return resp
+                return make_error_request_response(HTTPStatus.BAD_REQUEST, error=AuthError.USER_FINDBYUUID_ERROR)
+
         user_db = UserDB(storage_service=self.__db_storage_service, suuid=suuid, email=email,
                          limit=self.pagination.limit, offset=self.pagination.offset)
         if suuid is None and email is None:
@@ -140,8 +127,8 @@ class UserAPI(ResourceAPI):
             try:
                 user_list = user_db.find_all()
                 users_dict = [user_list[i].to_api_dict() for i in range(0, len(user_list))]
-                response_data = APIResponse(status=APIResponseStatus.success.value, code=HTTPStatus.OK, data=users_dict,
-                                            limit=self.pagination.limit, offset=self.pagination.offset)
+                response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK,
+                                            data=users_dict, limit=self.pagination.limit, offset=self.pagination.offset)
                 resp = make_api_response(data=response_data, http_code=HTTPStatus.OK)
                 return resp
             except UserException as e:
@@ -150,7 +137,7 @@ class UserAPI(ResourceAPI):
                 error = e.error
                 error_code = e.error_code
                 developer_message = e.developer_message
-                response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
+                response_data = APIResponse(status=APIResponseStatus.failed.status, code=http_code, error=error,
                                             developer_message=developer_message, error_code=error_code)
                 resp = make_api_response(data=response_data, http_code=http_code)
                 return resp
@@ -158,7 +145,7 @@ class UserAPI(ResourceAPI):
             # find user by suuid
             try:
                 user = user_db.find_by_suuid()
-                response_data = APIResponse(status=APIResponseStatus.success.value, code=HTTPStatus.OK,
+                response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK,
                                             data=user.to_api_dict())
                 resp = make_api_response(data=response_data, http_code=HTTPStatus.OK)
                 return resp
@@ -168,7 +155,7 @@ class UserAPI(ResourceAPI):
                 error = e.error
                 error_code = e.error_code
                 developer_message = e.developer_message
-                response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code,
+                response_data = APIResponse(status=APIResponseStatus.failed.status, code=http_code,
                                             developer_message=developer_message, error=error, error_code=error_code)
                 resp = make_api_response(data=response_data, http_code=http_code)
                 return resp
@@ -178,7 +165,7 @@ class UserAPI(ResourceAPI):
                 error = e.error
                 error_code = e.error_code
                 developer_message = e.developer_message
-                response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code,
+                response_data = APIResponse(status=APIResponseStatus.failed.status, code=http_code,
                                             developer_message=developer_message, error=error, error_code=error_code)
                 resp = make_api_response(data=response_data, http_code=http_code)
                 return resp
@@ -186,7 +173,7 @@ class UserAPI(ResourceAPI):
             # find user by email
             try:
                 user = user_db.find_by_email()
-                response_data = APIResponse(status=APIResponseStatus.success.value, code=HTTPStatus.OK,
+                response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK,
                                             data=user.to_api_dict())
                 resp = make_api_response(data=response_data, http_code=HTTPStatus.OK)
                 return resp
@@ -196,7 +183,7 @@ class UserAPI(ResourceAPI):
                 error = e.error
                 error_code = e.error_code
                 developer_message = e.developer_message
-                response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code,
+                response_data = APIResponse(status=APIResponseStatus.failed.status, code=http_code,
                                             developer_message=developer_message, error=error, error_code=error_code)
                 resp = make_api_response(data=response_data, http_code=http_code)
                 return resp
@@ -206,16 +193,9 @@ class UserAPI(ResourceAPI):
                 error = e.error
                 error_code = e.error_code
                 developer_message = e.developer_message
-                response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code,
+                response_data = APIResponse(status=APIResponseStatus.failed.status, code=http_code,
                                             developer_message=developer_message, error=error, error_code=error_code)
                 resp = make_api_response(data=response_data, http_code=http_code)
                 return resp
         else:
-            http_code = HTTPStatus.SERVICE_UNAVAILABLE
-            error = AuthError.UNKNOWN_ERROR_CODE.message
-            error_code = AuthError.UNKNOWN_ERROR_CODE.code
-            developer_message = AuthError.UNKNOWN_ERROR_CODE.developer_message
-            response_data = APIResponse(status=APIResponseStatus.failed.value, code=http_code, error=error,
-                                        error_code=error_code, developer_message=developer_message)
-            resp = make_api_response(data=response_data, http_code=http_code)
-            return resp
+            return make_error_request_response(HTTPStatus.BAD_REQUEST, error=AuthError.UNKNOWN_ERROR_CODE)

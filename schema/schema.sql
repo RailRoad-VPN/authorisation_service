@@ -16,21 +16,13 @@ DROP TABLE IF EXISTS public.user CASCADE;
 
 CREATE TABLE public.user
 (
-  uuid                UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL
-  ,
-  email               VARCHAR(255) UNIQUE
-  ,
-  password            TEXT
-  ,
-  enabled             BOOLEAN DEFAULT TRUE                       NOT NULL
-  ,
-  is_expired          BOOLEAN DEFAULT FALSE                      NOT NULL
-  ,
-  is_locked           BOOLEAN DEFAULT FALSE                      NOT NULL
-  ,
-  is_password_expired BOOLEAN DEFAULT FALSE                      NOT NULL
-  ,
-  created_date        TIMESTAMPTZ                                NOT NULL DEFAULT now()
-  ,
-  modife_date         TIMESTAMPTZ                                NOT NULL DEFAULT now()
+    uuid                UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL
+  , email               VARCHAR(255) UNIQUE
+  , password            TEXT
+  , enabled             BOOLEAN DEFAULT TRUE                       NOT NULL
+  , is_expired          BOOLEAN DEFAULT FALSE                      NOT NULL
+  , is_locked           BOOLEAN DEFAULT FALSE                      NOT NULL
+  , is_password_expired BOOLEAN DEFAULT FALSE                      NOT NULL
+  , created_date        TIMESTAMPTZ                                NOT NULL DEFAULT now()
+  , modife_date         TIMESTAMPTZ                                NOT NULL DEFAULT now()
 );
