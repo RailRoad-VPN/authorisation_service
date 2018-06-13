@@ -12,7 +12,7 @@ sys.path.insert(0, '../psql_library')
 from storage_service import DBStorageService
 
 sys.path.insert(1, '../rest_api_library')
-from utils import check_uuid, make_api_response, make_error_request_response
+from utils import check_uuid, make_api_response, make_error_request_response, check_required_api_fields
 from api import ResourceAPI
 from response import APIResponseStatus, APIResponse
 from rest import APIResourceURL
@@ -47,29 +47,42 @@ class UserAPI(ResourceAPI):
     def post(self) -> Response:
         request_json = request.json
 
+        if request_json is None:
+            return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.REQUEST_NO_JSON)
+
         email = request_json.get(UserDB._email_field, None)
-        created_date = request_json.get(UserDB._created_date_field, None)
         password = request_json.get(UserDB._password_field, None)
         is_expired = request_json.get(UserDB._is_expired_field, None)
         is_locked = request_json.get(UserDB._is_locked_field, None)
         is_password_expired = request_json.get(UserDB._is_password_expired_field, None)
         enabled = request_json.get(UserDB._enabled_field, None)
 
+        error_fields = check_required_api_fields(email, password, is_expired, is_locked, is_password_expired, enabled)
+        if len(error_fields) > 0:
+            response_data = APIResponse(status=APIResponseStatus.failed.status, code=HTTPStatus.BAD_REQUEST,
+                                        errors=error_fields)
+            resp = make_api_response(data=response_data, http_code=response_data.code)
+            return resp
+
         user_db = UserDB(storage_service=self.__db_storage_service, email=email,
-                         is_password_expired=is_password_expired, password=password, created_date=created_date,
+                         is_password_expired=is_password_expired, password=password,
                          is_expired=is_expired, is_locked=is_locked, enabled=enabled)
 
         try:
-            suuid = user_db.create()
-        except UserException as e:
-            logging.error(e)
-            error_code = e.error_code
-            error = e.error
-            developer_message = e.developer_message
-            http_code = HTTPStatus.BAD_REQUEST
-            response_data = APIResponse(status=APIResponseStatus.failed.status, code=http_code, error=error,
-                                        developer_message=developer_message, error_code=error_code)
-            return make_api_response(data=response_data, http_code=http_code)
+            user_db.find_by_email()
+            return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.USER_CREATE_EMAIL_EXIST_ERROR)
+        except UserNotFoundException:
+            try:
+                suuid = user_db.create()
+            except UserException as e:
+                logging.error(e)
+                error_code = e.error_code
+                error = e.error
+                developer_message = e.developer_message
+                http_code = HTTPStatus.BAD_REQUEST
+                response_data = APIResponse(status=APIResponseStatus.failed.status, code=http_code, error=error,
+                                            developer_message=developer_message, error_code=error_code)
+                return make_api_response(data=response_data, http_code=http_code)
 
         resp = make_api_response(http_code=HTTPStatus.CREATED)
         resp.headers['Location'] = '%s/%s/uuid/%s' % (self._config['API_BASE_URI'], self.__api_url__, suuid)
@@ -189,7 +202,7 @@ class UserAPI(ResourceAPI):
                 return resp
             except UserException as e:
                 logging.error(e)
-                http_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                http_code = HTTPStatus.BAD_REQUEST
                 error = e.error
                 error_code = e.error_code
                 developer_message = e.developer_message

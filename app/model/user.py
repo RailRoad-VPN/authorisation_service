@@ -130,7 +130,7 @@ class UserDB(UserStored):
             error_code = AuthError.USER_CREATE_ERROR_DB.code
             developer_message = "%s. DatabaseError. Something wrong with database or SQL is broken. " \
                                 "Code: %s . %s" % (
-                                AuthError.USER_CREATE_ERROR_DB.developer_message, e.pgcode, e.pgerror)
+                                    AuthError.USER_CREATE_ERROR_DB.developer_message, e.pgcode, e.pgerror)
 
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
         logging.debug('User created.')
@@ -178,7 +178,8 @@ class UserDB(UserStored):
                 pass
             error_message = AuthError.USER_UPDATE_ERROR_DB.message
             developer_message = "%s. DatabaseError. Something wrong with database or SQL is broken. " \
-                                "Code: %s . %s" % (AuthError.USER_UPDATE_ERROR_DB.developer_message, e.pgcode, e.pgerror)
+                                "Code: %s . %s" % (
+                                AuthError.USER_UPDATE_ERROR_DB.developer_message, e.pgcode, e.pgerror)
             error_code = AuthError.USER_UPDATE_ERROR_DB.code
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
 
@@ -210,7 +211,8 @@ class UserDB(UserStored):
             error_message = AuthError.USER_FINDBYUUID_ERROR_DB.message
             error_code = AuthError.USER_FINDBYUUID_ERROR_DB.code
             developer_message = "%s. DatabaseError. Something wrong with database or SQL is broken. " \
-                                "Code: %s . %s" % (AuthError.USER_FINDBYUUID_ERROR_DB.developer_message, e.pgcode, e.pgerror)
+                                "Code: %s . %s" % (
+                                AuthError.USER_FINDBYUUID_ERROR_DB.developer_message, e.pgcode, e.pgerror)
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
 
         if len(user_list_db) == 1:
@@ -257,7 +259,8 @@ class UserDB(UserStored):
             error_message = AuthError.USER_FINDBYEMAIL_ERROR_DB.message
             error_code = AuthError.USER_FINDBYEMAIL_ERROR_DB.code
             developer_message = "%s. DatabaseError. Something wrong with database or SQL is broken. " \
-                                "Code: %s . %s" % (AuthError.USER_FINDBYEMAIL_ERROR_DB.developer_message, e.pgcode, e.pgerror)
+                                "Code: %s . %s" % (
+                                AuthError.USER_FINDBYEMAIL_ERROR_DB.developer_message, e.pgcode, e.pgerror)
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
 
         if len(user_list_db) == 1:
@@ -303,7 +306,8 @@ class UserDB(UserStored):
             error_message = AuthError.USER_FINDALL_ERROR_DB.message
             error_code = AuthError.USER_FINDALL_ERROR_DB.code
             developer_message = "%s. DatabaseError. Something wrong with database or SQL is broken. " \
-                                "Code: %s . %s" % (AuthError.USER_FINDALL_ERROR_DB.developer_message, e.pgcode, e.pgerror)
+                                "Code: %s . %s" % (
+                                AuthError.USER_FINDALL_ERROR_DB.developer_message, e.pgcode, e.pgerror)
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
         user_list = []
 

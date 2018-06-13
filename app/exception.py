@@ -27,7 +27,9 @@ class AuthError(APIErrorEnum):
         return obj
 
     UNKNOWN_ERROR_CODE = (name + str(count()), 'UNKNOWN_ERROR_CODE phrase', 'UNKNOWN_ERROR_CODE description')
+    REQUEST_NO_JSON = (name + str(count()), 'REQUEST_NO_JSON phrase', 'REQUEST_NO_JSON description')
 
+    USER_CREATE_EMAIL_EXIST_ERROR = (name + str(count()), 'USER_CREATE_EMAIL_EXIST_ERROR phrase', 'USER_CREATE_EMAIL_EXIST_ERROR description')
     USER_UPDATE_ERROR_DB = (name + str(count()), 'USER_UPDATE_ERROR_DB phrase', 'USER_UPDATE_ERROR_DB description')
     USER_FINDBYUUID_ERROR_DB = (name + str(count()), 'USER_FINDBYUUID_ERROR_DB phrase', 'USER_FINDBYUUID_ERROR_DB description')
     USER_FINDBYUUID_ERROR = (name + str(count()), 'USER_FINDBYUUID_ERROR phrase', 'USER_FINDBYUUID_ERROR description')
