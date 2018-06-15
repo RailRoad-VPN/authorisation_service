@@ -57,7 +57,16 @@ class UserAPI(ResourceAPI):
         is_password_expired = request_json.get(UserDB._is_password_expired_field, None)
         enabled = request_json.get(UserDB._enabled_field, None)
 
-        error_fields = check_required_api_fields(email, password, is_expired, is_locked, is_password_expired, enabled)
+        req_fields = {
+            'email': email,
+            'password': password,
+            'is_expired': is_expired,
+            'is_locked': is_locked,
+            'is_password_expired': is_password_expired,
+            'enabled': enabled,
+        }
+
+        error_fields = check_required_api_fields(req_fields)
         if len(error_fields) > 0:
             response_data = APIResponse(status=APIResponseStatus.failed.status, code=HTTPStatus.BAD_REQUEST,
                                         errors=error_fields)
@@ -104,6 +113,22 @@ class UserAPI(ResourceAPI):
         is_locked = request_json.get(UserDB._is_locked_field, None)
         is_password_expired = request_json.get(UserDB._is_password_expired_field, None)
         enabled = request_json.get(UserDB._enabled_field, None)
+
+        req_fields = {
+            'email': email,
+            'password': password,
+            'is_expired': is_expired,
+            'is_locked': is_locked,
+            'is_password_expired': is_password_expired,
+            'enabled': enabled,
+        }
+
+        error_fields = check_required_api_fields(req_fields)
+        if len(error_fields) > 0:
+            response_data = APIResponse(status=APIResponseStatus.failed.status, code=HTTPStatus.BAD_REQUEST,
+                                        errors=error_fields)
+            resp = make_api_response(data=response_data, http_code=response_data.code)
+            return resp
 
         user_db = UserDB(storage_service=self.__db_storage_service, suuid=user_uuid, email=email,
                          is_password_expired=is_password_expired, password=password, is_expired=is_expired,
