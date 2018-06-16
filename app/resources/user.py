@@ -52,18 +52,14 @@ class UserAPI(ResourceAPI):
 
         email = request_json.get(UserDB._email_field, None)
         password = request_json.get(UserDB._password_field, None)
-        is_expired = request_json.get(UserDB._is_expired_field, None)
-        is_locked = request_json.get(UserDB._is_locked_field, None)
-        is_password_expired = request_json.get(UserDB._is_password_expired_field, None)
-        enabled = request_json.get(UserDB._enabled_field, None)
+        is_expired = request_json.get(UserDB._is_expired_field, False)
+        is_locked = request_json.get(UserDB._is_locked_field, False)
+        is_password_expired = request_json.get(UserDB._is_password_expired_field, False)
+        enabled = request_json.get(UserDB._enabled_field, True)
 
         req_fields = {
             'email': email,
-            'password': password,
-            'is_expired': is_expired,
-            'is_locked': is_locked,
-            'is_password_expired': is_password_expired,
-            'enabled': enabled,
+            'password': password
         }
 
         error_fields = check_required_api_fields(req_fields)
