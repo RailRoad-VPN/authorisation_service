@@ -13,6 +13,7 @@ SET default_with_oids = FALSE;
 -- CREATE EXTENSION pgcrypto;
 
 DROP TABLE IF EXISTS public.user CASCADE;
+DROP TABLE IF EXISTS public.user_device CASCADE;
 
 CREATE TABLE public.user
 (
@@ -23,6 +24,20 @@ CREATE TABLE public.user
   , is_expired          BOOLEAN DEFAULT FALSE                      NOT NULL
   , is_locked           BOOLEAN DEFAULT FALSE                      NOT NULL
   , is_password_expired BOOLEAN DEFAULT FALSE                      NOT NULL
-  , created_date        TIMESTAMPTZ                                NOT NULL DEFAULT now()
-  , modife_date         TIMESTAMPTZ                                NOT NULL DEFAULT now()
+  , created_date        TIMESTAMP                                  NOT NULL DEFAULT now()
+  , modife_date         TIMESTAMP                                  NOT NULL DEFAULT now()
+);
+
+CREATE TABLE public.user_device
+(
+    uuid UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL
+  , user_uuid UUID REFERENCES public.user(uuid) NOT NULL
+  , pin_code INT NOT NULL
+  , device_token VARCHAR(256) UNIQUE
+  , device_name VARCHAR(256)
+  , location VARCHAR(256)
+  , is_active BOOLEAN DEFAULT FALSE NOT NULL
+  , modify_date TIMESTAMP NOT NULL DEFAULT now()
+  , modify_reason TEXT NOT NULL DEFAULT 'init'
+  , created_date TIMESTAMP DEFAULT NOW() NOT NULL
 );

@@ -38,7 +38,7 @@ class User(object):
 
     def to_dict(self):
         return {
-            'uuid': str(self._suuid),
+            'uuid': self._suuid,
             'email': self._email,
             'created_date': self._created_date,
             'password': self._password,

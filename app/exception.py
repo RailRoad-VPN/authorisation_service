@@ -38,6 +38,16 @@ class AuthError(APIErrorEnum):
     USER_FINDALL_ERROR_DB = (name + str(count()), 'USER_FINDALL_ERROR_DB phrase', 'USER_FINDALL_ERROR_DB description')
     USER_CREATE_ERROR_DB = (name + str(count()), 'USER_CREATE_ERROR_DB phrase', 'USER_CREATE_ERROR_DB description')
 
+    USER_DEVICE_CREATE_ERROR_DB = (name + str(count()), 'USER_DEVICE_CREATE_ERROR_DB phrase', 'USER_DEVICE_CREATE_ERROR_DB description')
+    USER_DEVICE_UPDATE_ERROR_DB = (name + str(count()), 'USER_DEVICE_UPDATE_ERROR_DB phrase', 'USER_DEVICE_UPDATE_ERROR_DB description')
+    USER_DEVICE_FINDBYUUID_ERROR_DB = (name + str(count()), 'USER_DEVICE_FINDBYUUID_ERROR_DB phrase', 'USER_DEVICE_FINDBYUUID_ERROR_DB description')
+    USER_DEVICE_FINDBYUUID_ERROR = (name + str(count()), 'USER_DEVICE_FINDBYUUID_ERROR phrase', 'USER_DEVICE_FINDBYUUID_ERROR description')
+    USER_DEVICE_FINDBYDEVICETOKEN_ERROR_DB = (name + str(count()), 'USER_DEVICE_FINDBYDEVICETOKEN_ERROR_DB phrase', 'USER_DEVICE_FINDBYDEVICETOKEN_ERROR_DB description')
+    USER_DEVICE_FINDBYDEVICETOKEN_ERROR = (name + str(count()), 'USER_DEVICE_FINDBYDEVICETOKEN_ERROR phrase', 'USER_DEVICE_FINDBYDEVICETOKEN_ERROR description')
+    USER_DEVICE_FINDBYUSERUUID_ERROR_DB = (name + str(count()), 'USER_DEVICE_FINDBYUSERUUID_ERROR_DB phrase', 'USER_DEVICE_FINDBYUSERUUID_ERROR_DB description')
+    USER_DEVICE_FINDBYUSERUUID_ERROR = (name + str(count()), 'USER_DEVICE_FINDBYUSERUUID_ERROR phrase', 'USER_DEVICE_FINDBYUSERUUID_ERROR description')
+    USER_DEVICE_FINDALL_ERROR_DB = (name + str(count()), 'USER_DEVICE_FINDALL_ERROR_DB phrase', 'USER_DEVICE_FINDALL_ERROR_DB description')
+
 
 class AuthException(Exception):
     __version__ = 1
@@ -61,6 +71,20 @@ class UserException(AuthException):
 
 
 class UserNotFoundException(AuthException):
+    __version__ = 1
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class UserDeviceException(AuthException):
+    __version__ = 1
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class UserDeviceNotFoundException(AuthException):
     __version__ = 1
 
     def __init__(self, *args, **kwargs):
