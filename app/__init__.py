@@ -8,7 +8,7 @@ from flask import Flask, request
 
 from app.exception import AuthError
 from app.resources.users import UserAPI
-from users.devices import UserDeviceAPI
+from app.resources.users.devices import UserDeviceAPI
 
 sys.path.insert(0, '../psql_library')
 from psql_helper import PostgreSQL
