@@ -33,8 +33,8 @@ CREATE TABLE public.user_device
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL
   , user_uuid UUID REFERENCES public.user(uuid) NOT NULL
   , pin_code INT NOT NULL
-  , device_token VARCHAR(256) UNIQUE
-  , device_name VARCHAR(256)
+  , device_token VARCHAR(256)
+  , device_id VARCHAR(500)
   , location VARCHAR(256)
   , is_active BOOLEAN DEFAULT FALSE NOT NULL
   , modify_date TIMESTAMP NOT NULL DEFAULT now()

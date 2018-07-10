@@ -7,6 +7,7 @@ from flask import Response, request
 
 from app.exception import AuthError, UserException, UserNotFoundException
 from app.model.user import UserDB
+from user.device import UserDeviceDB
 
 sys.path.insert(0, '../psql_library')
 from storage_service import DBStorageService
@@ -36,6 +37,7 @@ class UserAPI(ResourceAPI):
             APIResourceURL(base_url=url, resource_name='<string:suuid>', methods=['PUT']),
             APIResourceURL(base_url=url, resource_name='uuid/<string:suuid>', methods=['GET']),
             APIResourceURL(base_url=url, resource_name='email/<string:email>', methods=['GET']),
+            APIResourceURL(base_url=url, resource_name='device/pincode/<string:pin_code>', methods=['GET']),
         ]
         return api_urls
 
@@ -147,12 +149,34 @@ class UserAPI(ResourceAPI):
         resp.headers['Location'] = '%s/%s/uuid/%s' % (self._config['API_BASE_URI'], self.__api_url__, suuid)
         return resp
 
-    def get(self, suuid: str = None, email: str = None) -> Response:
+    def get(self, suuid: str = None, email: str = None, pin_code: str = None) -> Response:
         super(UserAPI, self).get(req=request)
+
         if suuid is not None:
             is_valid = check_uuid(suuid=suuid)
             if not is_valid:
                 return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.USER_FINDBYUUID_ERROR)
+
+        if pin_code is not None:
+            user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, pin_code=pin_code)
+
+            try:
+                user_device = user_device_db.find_by_pincode()
+                response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK,
+                                            data=user_device.to_api_dict()['user_uuid'], limit=self.pagination.limit,
+                                            offset=self.pagination.offset)
+                resp = make_api_response(data=response_data, http_code=HTTPStatus.OK)
+                return resp
+            except UserException as e:
+                logging.error(e)
+                http_code = HTTPStatus.BAD_REQUEST
+                error = e.error
+                error_code = e.error_code
+                developer_message = e.developer_message
+                response_data = APIResponse(status=APIResponseStatus.failed.status, code=http_code, error=error,
+                                            developer_message=developer_message, error_code=error_code)
+                resp = make_api_response(data=response_data, http_code=http_code)
+                return resp
 
         user_db = UserDB(storage_service=self.__db_storage_service, suuid=suuid, email=email,
                          limit=self.pagination.limit, offset=self.pagination.offset)
