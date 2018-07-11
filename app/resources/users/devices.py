@@ -68,9 +68,9 @@ class UserDeviceAPI(ResourceAPI):
             resp = make_api_response(data=response_data, http_code=response_data.code)
             return resp
 
-        user_db = UserDeviceDB(storage_service=self.__db_storage_service, user_uuid=user_uuid, pin_code=pin_code)
+        user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, user_uuid=user_uuid, pin_code=pin_code)
         try:
-            suuid = user_db.create()
+            suuid = user_device_db.create()
         except UserDeviceException as e:
             logging.error(e)
             error_code = e.error_code
@@ -149,9 +149,10 @@ class UserDeviceAPI(ResourceAPI):
             resp = make_api_response(data=response_data, http_code=http_code)
             return resp
 
-
-        # TODO return user and user subscription
-        resp = make_api_response(http_code=HTTPStatus.NO_CONTENT)
+        response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK)
+        resp = make_api_response(http_code=HTTPStatus.OK, data=response_data)
+        api_url = self.__api_url__.replace('<string:user_uuid>', user_uuid)
+        resp.headers['Location'] = '%s/%s/%s' % (self._config['API_BASE_URI'], api_url, suuid)
         return resp
 
     def get(self, user_uuid: str, suuid: str = None) -> Response:

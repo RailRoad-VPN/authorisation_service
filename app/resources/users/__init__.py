@@ -7,7 +7,7 @@ from flask import Response, request
 
 from app.exception import AuthError, UserException, UserNotFoundException
 from app.model.user import UserDB
-from user.device import UserDeviceDB
+from app.model.user.device import UserDeviceDB
 
 sys.path.insert(0, '../psql_library')
 from storage_service import DBStorageService
