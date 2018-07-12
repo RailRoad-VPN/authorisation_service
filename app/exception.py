@@ -37,6 +37,8 @@ class AuthError(APIErrorEnum):
     USER_FINDBYEMAIL_ERROR = (name + str(count()), 'USER_FINDBYEMAIL_ERROR phrase', 'USER_FINDBYEMAIL_ERROR description')
     USER_FINDALL_ERROR_DB = (name + str(count()), 'USER_FINDALL_ERROR_DB phrase', 'USER_FINDALL_ERROR_DB description')
     USER_CREATE_ERROR_DB = (name + str(count()), 'USER_CREATE_ERROR_DB phrase', 'USER_CREATE_ERROR_DB description')
+    USER_FINDBYPINCODE_ERROR_DB = (name + str(count()), 'USER_FINDBYPINCODE_ERROR_DB phrase', 'USER_FINDBYPINCODE_ERROR_DB description')
+    USER_FINDBYPINCODE_ERROR = (name + str(count()), 'USER_FINDBYPINCODE_ERROR phrase', 'USER_FINDBYPINCODE_ERROR description')
 
     USER_DEVICE_CREATE_ERROR_DB = (name + str(count()), 'USER_DEVICE_CREATE_ERROR_DB phrase', 'USER_DEVICE_CREATE_ERROR_DB description')
     USER_DEVICE_UPDATE_ERROR_DB = (name + str(count()), 'USER_DEVICE_UPDATE_ERROR_DB phrase', 'USER_DEVICE_UPDATE_ERROR_DB description')

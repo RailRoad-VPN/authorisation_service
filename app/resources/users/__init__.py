@@ -7,13 +7,13 @@ from flask import Response, request
 
 from app.exception import AuthError, UserException, UserNotFoundException
 from app.model.user import UserDB
-from app.model.user.device import UserDeviceDB
 
 sys.path.insert(0, '../psql_library')
 from storage_service import DBStorageService
 
 sys.path.insert(1, '../rest_api_library')
-from utils import check_uuid, make_api_response, make_error_request_response, check_required_api_fields
+from utils import check_uuid
+from response import make_api_response, make_error_request_response, check_required_api_fields
 from api import ResourceAPI
 from response import APIResponseStatus, APIResponse
 from rest import APIResourceURL
@@ -37,7 +37,7 @@ class UserAPI(ResourceAPI):
             APIResourceURL(base_url=url, resource_name='<string:suuid>', methods=['PUT']),
             APIResourceURL(base_url=url, resource_name='uuid/<string:suuid>', methods=['GET']),
             APIResourceURL(base_url=url, resource_name='email/<string:email>', methods=['GET']),
-            APIResourceURL(base_url=url, resource_name='device/pincode/<string:pin_code>', methods=['GET']),
+            APIResourceURL(base_url=url, resource_name='pincode/<string:pin_code>', methods=['GET']),
         ]
         return api_urls
 
@@ -111,6 +111,8 @@ class UserAPI(ResourceAPI):
         is_locked = request_json.get(UserDB._is_locked_field, None)
         is_password_expired = request_json.get(UserDB._is_password_expired_field, None)
         enabled = request_json.get(UserDB._enabled_field, None)
+        pin_code = request_json.get(UserDB._pin_code_field, None)
+        pin_code_expire_date = request_json.get(UserDB._pin_code_expire_date_field, None)
 
         req_fields = {
             'email': email,
@@ -119,6 +121,7 @@ class UserAPI(ResourceAPI):
             'is_locked': is_locked,
             'is_password_expired': is_password_expired,
             'enabled': enabled,
+            'pin_code': pin_code,
         }
 
         error_fields = check_required_api_fields(req_fields)
@@ -130,8 +133,7 @@ class UserAPI(ResourceAPI):
 
         user_db = UserDB(storage_service=self.__db_storage_service, suuid=user_uuid, email=email,
                          is_password_expired=is_password_expired, password=password, is_expired=is_expired,
-                         is_locked=is_locked, enabled=enabled)
-
+                         is_locked=is_locked, enabled=enabled, pin_code=pin_code, pin_code_expire_date=pin_code_expire_date)
         try:
             user_db.update()
         except UserException as e:
@@ -155,16 +157,16 @@ class UserAPI(ResourceAPI):
         if suuid is not None:
             is_valid = check_uuid(suuid=suuid)
             if not is_valid:
-                return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.USER_FINDBYUUID_ERROR)
+                return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.USER_FINDBYPINCODE_ERROR)
+
+        user_db = UserDB(storage_service=self.__db_storage_service, suuid=suuid, email=email, pin_code=pin_code,
+                         limit=self.pagination.limit, offset=self.pagination.offset)
 
         if pin_code is not None:
-            user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, pin_code=pin_code)
-
             try:
-                user_device = user_device_db.find_by_pincode()
+                user = user_db.find_by_pin_code()
                 response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK,
-                                            data=user_device.to_api_dict()['user_uuid'], limit=self.pagination.limit,
-                                            offset=self.pagination.offset)
+                                            data=user.to_api_dict())
                 resp = make_api_response(data=response_data, http_code=HTTPStatus.OK)
                 return resp
             except UserException as e:
@@ -177,9 +179,17 @@ class UserAPI(ResourceAPI):
                                             developer_message=developer_message, error_code=error_code)
                 resp = make_api_response(data=response_data, http_code=http_code)
                 return resp
+            except UserNotFoundException as e:
+                logging.error(e)
+                http_code = HTTPStatus.NOT_FOUND
+                error = e.error
+                error_code = e.error_code
+                developer_message = e.developer_message
+                response_data = APIResponse(status=APIResponseStatus.failed.status, code=http_code, error=error,
+                                            developer_message=developer_message, error_code=error_code)
+                resp = make_api_response(data=response_data, http_code=http_code)
+                return resp
 
-        user_db = UserDB(storage_service=self.__db_storage_service, suuid=suuid, email=email,
-                         limit=self.pagination.limit, offset=self.pagination.offset)
         if suuid is None and email is None:
             # find all user is no parameter set
             try:

@@ -1,5 +1,6 @@
 import logging
 import sys
+import uuid
 from http import HTTPStatus
 from typing import List
 
@@ -12,7 +13,8 @@ sys.path.insert(0, '../psql_library')
 from storage_service import DBStorageService
 
 sys.path.insert(1, '../rest_api_library')
-from utils import check_uuid, make_api_response, make_error_request_response, check_required_api_fields
+from utils import check_uuid
+from response import make_api_response, make_error_request_response, check_required_api_fields
 from api import ResourceAPI
 from response import APIResponseStatus, APIResponse
 from rest import APIResourceURL
@@ -49,16 +51,15 @@ class UserDeviceAPI(ResourceAPI):
             return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.REQUEST_NO_JSON)
 
         user_uuid = request_json.get(UserDeviceDB._user_uuid_field, None)
+        device_id = request_json.get(UserDeviceDB._device_id_field, None)
+        device_token = request_json.get(UserDeviceDB._device_token_field, None)
+        location = request_json.get(UserDeviceDB._location_field, None)
         is_active = request_json.get(UserDeviceDB._is_active_field, False)
-        try:
-            pin_code = int(request_json.get(UserDeviceDB._pin_code_field, None))
-        except KeyError:
-            pin_code = None
 
         req_fields = {
             'user_uuid': user_uuid,
-            'pin_code': pin_code,
-            'is_active': is_active
+            'device_id': device_id,
+            'is_active': is_active,
         }
 
         error_fields = check_required_api_fields(req_fields)
@@ -68,7 +69,12 @@ class UserDeviceAPI(ResourceAPI):
             resp = make_api_response(data=response_data, http_code=response_data.code)
             return resp
 
-        user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, user_uuid=user_uuid, pin_code=pin_code)
+        if device_token is None:
+            device_token = uuid.uuid4().hex
+
+        user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, user_uuid=user_uuid,
+                                      device_id=device_id, device_token=device_token, location=location,
+                                      is_active=is_active)
         try:
             suuid = user_device_db.create()
         except UserDeviceException as e:
@@ -85,19 +91,23 @@ class UserDeviceAPI(ResourceAPI):
         resp = make_api_response(http_code=HTTPStatus.CREATED, data=response_data)
         api_url = self.__api_url__.replace('<string:user_uuid>', user_uuid)
         resp.headers['Location'] = '%s/%s/%s' % (self._config['API_BASE_URI'], api_url, suuid)
+        resp.headers['X-Device-Token'] = device_token
         return resp
 
-    def put(self, user_uuid: str, suuid: str = None) -> Response:
+    def put(self, user_uuid: str, suuid: str) -> Response:
         request_json = request.json
 
+        suuid_b = request_json.get(UserDeviceDB._user_uuid_field, None)
         user_uuid_b = request_json.get(UserDeviceDB._user_uuid_field, None)
 
-        is_valid = check_uuid(suuid=user_uuid)
-        is_valid_b = check_uuid(suuid=user_uuid_b)
-        if not is_valid or not is_valid_b or user_uuid != user_uuid_b:
+        is_valid_uuid = check_uuid(suuid=suuid)
+        is_valid_uuid_b = check_uuid(suuid=suuid_b)
+        is_valid_user_uuid = check_uuid(suuid=user_uuid)
+        is_valid_user_uuid_b = check_uuid(suuid=user_uuid_b)
+        if not is_valid_user_uuid or not is_valid_user_uuid_b or not is_valid_uuid or not is_valid_uuid_b \
+                or user_uuid != user_uuid_b:
             return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.USER_DEVICE_FINDBYUUID_ERROR)
 
-        pin_code = request_json.get(UserDeviceDB._pin_code_field, None)
         device_token = request_json.get(UserDeviceDB._device_token_field, None)
         device_id = request_json.get(UserDeviceDB._device_id_field, None)
         location = request_json.get(UserDeviceDB._location_field, None)
@@ -106,21 +116,11 @@ class UserDeviceAPI(ResourceAPI):
 
         req_fields = {
             'user_uuid': user_uuid,
+            'device_token': device_token,
             'device_id': device_id,
             'is_active': is_active,
             'modify_reason': modify_reason,
         }
-
-        if suuid is not None:
-            suuid_b = request_json.get(UserDeviceDB._suuid_field, None)
-
-            is_valid = check_uuid(suuid=suuid)
-            is_valid_b = check_uuid(suuid=suuid_b)
-            if not is_valid or not is_valid_b or suuid != suuid_b:
-                return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.USER_DEVICE_FINDBYUUID_ERROR)
-
-            req_fields['uuid'] = suuid
-            req_fields['device_token'] = device_token
 
         error_fields = check_required_api_fields(req_fields)
         if len(error_fields) > 0:
@@ -129,15 +129,11 @@ class UserDeviceAPI(ResourceAPI):
             resp = make_api_response(data=response_data, http_code=response_data.code)
             return resp
 
-        user_db = UserDeviceDB(storage_service=self.__db_storage_service, suuid=suuid, user_uuid=user_uuid,
-                               pin_code=pin_code, device_token=device_token, device_id=device_id, location=location,
-                               is_active=is_active, modify_reason=modify_reason)
-
+        user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, suuid=suuid, user_uuid=user_uuid,
+                                      device_token=device_token, device_id=device_id, location=location,
+                                      is_active=is_active, modify_reason=modify_reason)
         try:
-            if suuid is None:
-                user_db.update_by_pin_code()
-            else:
-                user_db.update()
+            user_device_db.update()
         except UserDeviceException as e:
             logging.error(e)
             http_code = HTTPStatus.BAD_REQUEST
