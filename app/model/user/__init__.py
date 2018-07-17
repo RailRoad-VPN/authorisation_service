@@ -25,10 +25,14 @@ class User(object):
     _enabled = None
     _pin_code = None
     _pin_code_expire_date = None
+    _modify_date = None
+    _modify_reason = None
+    _is_pin_code_activated = None
 
     def __init__(self, suuid: str = None, email: str = None, created_date: datetime = None, password: str = None,
                  is_expired: bool = False, is_locked: bool = False, is_password_expired: bool = False,
-                 enabled: bool = False, pin_code: int = None, pin_code_expire_date: datetime = None):
+                 enabled: bool = False, pin_code: int = None, pin_code_expire_date: datetime = None,
+                 modify_date: datetime = None, modify_reason: str = None, is_pin_code_activated: bool = False):
         self._suuid = suuid
         self._email = email
         self._created_date = created_date
@@ -39,6 +43,9 @@ class User(object):
         self._enabled = enabled
         self._pin_code = pin_code
         self._pin_code_expire_date = pin_code_expire_date
+        self._modify_date = modify_date
+        self._modify_reason = modify_reason
+        self._is_pin_code_activated = is_pin_code_activated
 
     def to_dict(self):
         return {
@@ -52,6 +59,9 @@ class User(object):
             'enabled': self._enabled,
             'pin_code': self._pin_code,
             'pin_code_expire_date': self._pin_code_expire_date,
+            'modify_date': self._modify_date,
+            'modify_reason': self._modify_reason,
+            'is_pin_code_activated': self._is_pin_code_activated,
         }
 
     def to_api_dict(self):
@@ -66,6 +76,9 @@ class User(object):
             'enabled': self._enabled,
             'pin_code': self._pin_code,
             'pin_code_expire_date': self._pin_code_expire_date,
+            'modify_date': self._modify_date,
+            'modify_reason': self._modify_reason,
+            'is_pin_code_activated': self._is_pin_code_activated,
         }
 
 
@@ -75,11 +88,13 @@ class UserStored(StoredObject, User):
     def __init__(self, storage_service: StorageService, suuid: str = None, email: str = None,
                  created_date: datetime = None, password: str = None, is_expired: bool = False, is_locked: bool = False,
                  is_password_expired: bool = False, enabled: bool = False, pin_code: int = None,
-                 pin_code_expire_date: datetime = None, limit: int = None, offset: int = None, **kwargs):
+                 pin_code_expire_date: datetime = None, modify_date: datetime = None, modify_reason: str = None,
+                 is_pin_code_activated=False, limit: int = None, offset: int = None, **kwargs):
         StoredObject.__init__(self, storage_service=storage_service, limit=limit, offset=offset)
         User.__init__(self, suuid=suuid, email=email, created_date=created_date, password=password,
                       is_expired=is_expired, is_locked=is_locked, is_password_expired=is_password_expired,
-                      enabled=enabled, pin_code=pin_code, pin_code_expire_date=pin_code_expire_date)
+                      enabled=enabled, pin_code=pin_code, pin_code_expire_date=pin_code_expire_date,
+                      modify_date=modify_date, modify_reason=modify_reason, is_pin_code_activated=is_pin_code_activated)
 
 
 class UserDB(UserStored):
@@ -95,6 +110,9 @@ class UserDB(UserStored):
     _enabled_field = 'enabled'
     _pin_code_field = 'pin_code'
     _pin_code_expire_date_field = 'pin_code_expire_date'
+    _modify_date_field = 'modify_date'
+    _modify_reason_field = 'modify_reason'
+    _is_pin_code_activated_field = 'is_pin_code_activated'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -113,10 +131,11 @@ class UserDB(UserStored):
                                 is_locked, 
                                 is_password_expired,
                                 pin_code,
-                                pin_code_expire_date
+                                pin_code_expire_date,
+                                is_pin_code_activated
                             ) 
                           VALUES 
-                            (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         '''
         create_user_params = (
             self._suuid,
@@ -128,6 +147,7 @@ class UserDB(UserStored):
             self._is_password_expired,
             self._pin_code,
             self._pin_code_expire_date,
+            self._is_pin_code_activated,
         )
         logging.debug('Create User SQL : %s' % create_user_sql)
 
@@ -153,6 +173,7 @@ class UserDB(UserStored):
         return self._suuid
 
     def update(self):
+        self._modify_date = datetime.datetime.now()
         logging.info('Update User')
 
         update_sql = '''
@@ -166,7 +187,10 @@ class UserDB(UserStored):
                       is_locked = ?, 
                       is_password_expired = ?,
                       pin_code = ?,
-                      pin_code_expire_date = ?
+                      pin_code_expire_date = ?,
+                      modify_date = ?,
+                      modify_reason = ?,
+                      is_pin_code_activated = ?
                     WHERE 
                       uuid = ?;
         '''
@@ -182,6 +206,9 @@ class UserDB(UserStored):
             self._is_password_expired,
             self._pin_code,
             self._pin_code_expire_date,
+            self._modify_date,
+            self._modify_reason,
+            self._is_pin_code_activated,
             self._suuid
         )
 
@@ -215,7 +242,10 @@ class UserDB(UserStored):
                             is_password_expired,
                             enabled,
                             pin_code,
-                            to_json(pin_code_expire_date) AS pin_code_expire_date
+                            to_json(pin_code_expire_date) AS pin_code_expire_date,
+                            to_json(modify_date) AS modify_date,
+                            modify_reason,
+                            is_pin_code_activated
                         FROM 
                             public."user" 
                         WHERE 
@@ -265,7 +295,10 @@ class UserDB(UserStored):
                             is_password_expired,
                             enabled,
                             pin_code,
-                            to_json(pin_code_expire_date) AS pin_code_expire_date
+                            to_json(pin_code_expire_date) AS pin_code_expire_date,
+                            to_json(modify_date) AS modify_date,
+                            modify_reason,
+                            is_pin_code_activated
                         FROM 
                             public."user" 
                         WHERE 
@@ -315,7 +348,10 @@ class UserDB(UserStored):
                             is_password_expired,
                             enabled,
                             pin_code,
-                            to_json(pin_code_expire_date) AS pin_code_expire_date
+                            to_json(pin_code_expire_date) AS pin_code_expire_date,
+                            to_json(modify_date) AS modify_date,
+                            modify_reason,
+                            is_pin_code_activated
                         FROM 
                             public."user" 
                         WHERE 
@@ -365,7 +401,10 @@ class UserDB(UserStored):
                             is_password_expired,
                             enabled,
                             pin_code,
-                            to_json(pin_code_expire_date) AS pin_code_expire_date
+                            to_json(pin_code_expire_date) AS pin_code_expire_date,
+                            to_json(modify_date) AS modify_date,
+                            modify_reason,
+                            is_pin_code_activated
                         FROM 
                             public."user" 
                     '''

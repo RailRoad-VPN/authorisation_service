@@ -17,17 +17,19 @@ DROP TABLE IF EXISTS public.user_device CASCADE;
 
 CREATE TABLE public.user
 (
-    uuid                UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL
-  , email               VARCHAR(255) UNIQUE
-  , password            TEXT
-  , enabled             BOOLEAN DEFAULT TRUE                       NOT NULL
-  , is_expired          BOOLEAN DEFAULT FALSE                      NOT NULL
-  , is_locked           BOOLEAN DEFAULT FALSE                      NOT NULL
-  , is_password_expired BOOLEAN DEFAULT FALSE                      NOT NULL
-  , created_date        TIMESTAMP                                  NOT NULL DEFAULT now()
-  , modife_date         TIMESTAMP                                  NOT NULL DEFAULT now()
-  , pin_code            INT
-  , pin_code_expire_date TIMESTAMP
+    uuid                  UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL
+  , email                 VARCHAR(255) UNIQUE
+  , password              TEXT
+  , enabled               BOOLEAN DEFAULT TRUE                       NOT NULL
+  , is_expired            BOOLEAN DEFAULT FALSE                      NOT NULL
+  , is_locked             BOOLEAN DEFAULT FALSE                      NOT NULL
+  , is_password_expired   BOOLEAN DEFAULT FALSE                      NOT NULL
+  , created_date          TIMESTAMP                                  NOT NULL DEFAULT now()
+  , modify_date           TIMESTAMP                                  NOT NULL DEFAULT now()
+  , modify_reason         TEXT                                       NOT NULL DEFAULT 'init'
+  , pin_code              INT
+  , pin_code_expire_date  TIMESTAMP
+  , is_pin_code_activated BOOLEAN                                             DEFAULT FALSE
 );
 
 CREATE TABLE public.user_device
