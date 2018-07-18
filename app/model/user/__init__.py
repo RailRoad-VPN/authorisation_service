@@ -440,4 +440,5 @@ class UserDB(UserStored):
                     is_password_expired=user_db[self._is_password_expired_field],
                     created_date=user_db[self._created_date_field], password=user_db[self._password_field],
                     enabled=user_db[self._enabled_field], pin_code=user_db[self._pin_code_field],
-                    pin_code_expire_date=user_db[self._pin_code_expire_date_field])
+                    pin_code_expire_date=user_db[self._pin_code_expire_date_field],
+                    is_pin_code_activated=user_db[self._is_pin_code_activated_field])
