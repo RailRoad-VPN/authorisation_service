@@ -19,6 +19,7 @@ from api import ResourceAPI
 from response import APIResponseStatus, APIResponse
 from rest import APIResourceURL
 
+logger = logging.getLogger(__name__)
 
 class UserDeviceAPI(ResourceAPI):
     __version__ = 1
