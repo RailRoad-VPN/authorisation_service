@@ -149,7 +149,8 @@ class UserAPI(ResourceAPI):
             resp = make_api_response(data=response_data, http_code=http_code)
             return resp
 
-        resp = make_api_response(http_code=HTTPStatus.NO_CONTENT)
+        response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK)
+        resp = make_api_response(data=response_data, http_code=HTTPStatus.OK)
         resp.headers['Location'] = '%s/%s/uuid/%s' % (self._config['API_BASE_URI'], self.__api_url__, suuid)
         return resp
 
