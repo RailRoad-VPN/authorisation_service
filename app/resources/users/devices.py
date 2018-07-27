@@ -21,6 +21,7 @@ from rest import APIResourceURL
 
 logger = logging.getLogger(__name__)
 
+
 class UserDeviceAPI(ResourceAPI):
     __version__ = 1
 
@@ -150,6 +151,7 @@ class UserDeviceAPI(ResourceAPI):
         resp = make_api_response(http_code=HTTPStatus.OK, data=response_data)
         api_url = self.__api_url__.replace('<string:user_uuid>', user_uuid)
         resp.headers['Location'] = '%s/%s/%s' % (self._config['API_BASE_URI'], api_url, suuid)
+        resp.headers['X-Device-Token'] = device_token
         return resp
 
     def get(self, user_uuid: str, suuid: str = None) -> Response:
