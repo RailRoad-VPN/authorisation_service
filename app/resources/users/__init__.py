@@ -31,7 +31,7 @@ class UserAPI(ResourceAPI):
 
     @staticmethod
     def get_api_urls(base_url: str) -> List[APIResourceURL]:
-        url = "%s/%s" % (base_url, UserAPI.__api_url__)
+        url = f"{base_url}/{UserAPI.__api_url__}"
         api_urls = [
             APIResourceURL(base_url=url, resource_name='', methods=['GET', 'POST']),
             APIResourceURL(base_url=url, resource_name='<string:suuid>', methods=['PUT']),
@@ -92,7 +92,7 @@ class UserAPI(ResourceAPI):
                 return make_api_response(data=response_data, http_code=http_code)
 
         resp = make_api_response(http_code=HTTPStatus.CREATED)
-        resp.headers['Location'] = '%s/%s/uuid/%s' % (self._config['API_BASE_URI'], self.__api_url__, suuid)
+        resp.headers['Location'] = f"{self._config['API_BASE_URI']}/{self.__api_url__}/uuid/{suuid}"
         return resp
 
     def put(self, suuid: str = None) -> Response:
@@ -151,7 +151,7 @@ class UserAPI(ResourceAPI):
 
         response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK)
         resp = make_api_response(data=response_data, http_code=HTTPStatus.OK)
-        resp.headers['Location'] = '%s/%s/uuid/%s' % (self._config['API_BASE_URI'], self.__api_url__, suuid)
+        resp.headers['Location'] = f"{self._config['API_BASE_URI']}/{self.__api_url__}/uuid/{suuid}"
         return resp
 
     def get(self, suuid: str = None, email: str = None, pin_code: str = None) -> Response:

@@ -251,7 +251,7 @@ class UserDB(UserStored):
                         WHERE 
                             uuid = ?
                     '''
-        logging.debug('Select SQL: %s' % select_sql)
+        logging.debug(f"Select SQL: {select_sql}")
         params = (self._suuid,)
 
         try:
@@ -304,7 +304,7 @@ class UserDB(UserStored):
                         WHERE 
                             email = ?
                     '''
-        logging.debug('Select SQL: %s' % select_sql)
+        logging.debug(f"Select SQL: {select_sql}")
         params = (self._email,)
 
         try:
@@ -357,7 +357,7 @@ class UserDB(UserStored):
                         WHERE 
                             pin_code = ?
                     '''
-        logging.debug('Select SQL: %s' % select_sql)
+        logging.debug(f"Select SQL: {select_sql}")
         params = (self._pin_code,)
 
         try:
@@ -409,8 +409,8 @@ class UserDB(UserStored):
                             public."user" 
                     '''
         if self._limit:
-            select_sql += "LIMIT %s\nOFFSET %s" % (self._limit, self._offset)
-        logging.debug('Select SQL: %s' % select_sql)
+            select_sql += f"\nLIMIT {self._limit}\nOFFSET {self._offset}"
+        logging.debug(f"Select SQL: {select_sql}")
 
         try:
             logging.debug('Call database service')
