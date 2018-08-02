@@ -90,7 +90,7 @@ class UserDeviceAPI(ResourceAPI):
             return make_api_response(data=response_data, http_code=http_code)
 
         response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.CREATED)
-        resp = make_api_response(http_code=HTTPStatus.CREATED, data=response_data)
+        resp = make_api_response(data=response_data, http_code=HTTPStatus.CREATED)
         api_url = self.__api_url__.replace('<string:user_uuid>', user_uuid)
         resp.headers['Location'] = '%s/%s/%s' % (self._config['API_BASE_URI'], api_url, suuid)
         resp.headers['X-Device-Token'] = device_token
