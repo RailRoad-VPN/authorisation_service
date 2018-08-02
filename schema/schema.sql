@@ -38,6 +38,7 @@ CREATE TABLE public.user_device
   , user_uuid UUID REFERENCES public.user(uuid) NOT NULL
   , device_token VARCHAR(256)
   , device_id VARCHAR(500)
+  , device_os VARCHAR(500)
   , location VARCHAR(256)
   , is_active BOOLEAN DEFAULT FALSE NOT NULL
   , modify_date TIMESTAMP NOT NULL DEFAULT now()

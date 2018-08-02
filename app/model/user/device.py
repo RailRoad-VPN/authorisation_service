@@ -19,6 +19,7 @@ class UserDevice(object):
     _user_uuid = None
     _device_token = None
     _device_id = None
+    _device_os = None
     _location = None
     _is_active = None
     _modify_reason = None
@@ -26,12 +27,13 @@ class UserDevice(object):
     _created_date = None
 
     def __init__(self, suuid: str = None, user_uuid: str = None, device_token: str = None,
-                 device_id: str = None, location: str = None, is_active: bool = None, modify_reason: str = None,
+                 device_id: str = None, device_os: str = None, location: str = None, is_active: bool = None, modify_reason: str = None,
                  modify_date: datetime = None, created_date: datetime = None):
         self._suuid = suuid
         self._user_uuid = user_uuid
         self._device_token = device_token
         self._device_id = device_id
+        self._device_os = device_os
         self._location = location
         self._is_active = is_active
         self._modify_reason = modify_reason
@@ -44,6 +46,7 @@ class UserDevice(object):
             'user_uuid': str(self._user_uuid),
             'device_token': self._device_token,
             'device_id': self._device_id,
+            'device_os': self._device_os,
             'location': self._location,
             'is_active': self._is_active,
             'modify_reason': self._modify_reason,
@@ -57,6 +60,7 @@ class UserDevice(object):
             'user_uuid': str(self._user_uuid),
             'device_token': self._device_token,
             'device_id': self._device_id,
+            'device_os': self._device_os,
             'location': self._location,
             'is_active': self._is_active,
             'modify_reason': self._modify_reason,
@@ -69,12 +73,12 @@ class UserDeviceStored(StoredObject, UserDevice):
     __version__ = 1
 
     def __init__(self, storage_service: StorageService, suuid: str = None, user_uuid: str = None,
-                 device_token: str = None, device_id: str = None, location: str = None, is_active: bool = None,
+                 device_token: str = None, device_id: str = None, device_os: str = None, location: str = None, is_active: bool = None,
                  modify_reason: str = None, created_date: datetime = None, limit: int = None, offset: int = None,
                  **kwargs):
         StoredObject.__init__(self, storage_service=storage_service, limit=limit, offset=offset)
         UserDevice.__init__(self, suuid=suuid, user_uuid=user_uuid, device_token=device_token,
-                            device_id=device_id, location=location, is_active=is_active,
+                            device_id=device_id, device_os=device_os, location=location, is_active=is_active,
                             modify_reason=modify_reason, created_date=created_date)
 
 
@@ -85,6 +89,7 @@ class UserDeviceDB(UserDeviceStored):
     _user_uuid_field = 'user_uuid'
     _device_token_field = 'device_token'
     _device_id_field = 'device_id'
+    _device_os_field = 'device_os'
     _location_field = 'location'
     _is_active_field = 'is_active'
     _modify_reason_field = 'modify_reason'
@@ -104,17 +109,19 @@ class UserDeviceDB(UserDeviceStored):
                                 user_uuid,
                                 device_token,
                                 device_id,
+                                device_os,
                                 location,
                                 is_active
                             ) 
                           VALUES 
-                            (?, ?, ?, ?, ?, ?)
+                            (?, ?, ?, ?, ?, ?, ?)
         '''
         create_user_device_params = (
             self._suuid,
             self._user_uuid,
             self._device_token,
             self._device_id,
+            self._device_os,
             self._location,
             self._is_active,
         )
@@ -151,6 +158,7 @@ class UserDeviceDB(UserDeviceStored):
                       user_uuid = ?,
                       device_token = ?,
                       device_id = ?,
+                      device_os = ?,
                       location = ?,
                       is_active = ?,
                       modify_reason = ?
@@ -164,6 +172,7 @@ class UserDeviceDB(UserDeviceStored):
             self._user_uuid,
             self._device_token,
             self._device_id,
+            self._device_os,
             self._location,
             self._is_active,
             self._modify_reason,
@@ -194,6 +203,7 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
+                            device_os,
                             location,
                             is_active,
                             modify_reason,
@@ -244,6 +254,7 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
+                            device_os,
                             location,
                             is_active,
                             modify_reason,
@@ -295,6 +306,7 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
+                            device_os,
                             location,
                             is_active,
                             modify_reason,
@@ -346,6 +358,7 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
+                            device_os,
                             location,
                             is_active,
                             modify_reason,
@@ -384,6 +397,7 @@ class UserDeviceDB(UserDeviceStored):
         return UserDevice(suuid=user_device_db[self._suuid_field], user_uuid=user_device_db[self._user_uuid_field],
                           device_token=user_device_db[self._device_token_field],
                           device_id=user_device_db[self._device_id_field],
+                          device_os=user_device_db[self._device_os_field],
                           location=user_device_db[self._location_field],
                           is_active=user_device_db[self._is_active_field],
                           modify_reason=user_device_db[self._modify_reason_field],
