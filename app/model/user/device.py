@@ -298,7 +298,7 @@ class UserDeviceDB(UserDeviceStored):
 
         return self.__map_user_devicedb_to_user_device(user_device_db=user_device_db)
 
-    def find_by_user_uuid(self) -> UserDevice:
+    def find_by_user_uuid(self) -> List[UserDevice]:
         logging.info('Find UserDevice by device_token')
         select_sql = '''
                         SELECT 
@@ -333,22 +333,12 @@ class UserDeviceDB(UserDeviceStored):
                                     e.pgerror)
             raise UserDeviceException(error=error_message, error_code=error_code, developer_message=developer_message)
 
-        if len(user_device_list_db) == 1:
-            user_device_db = user_device_list_db[0]
-        elif len(user_device_list_db) == 0:
-            error_message = AuthError.USER_DEVICE_FINDBYUSERUUID_ERROR.message
-            error_code = AuthError.USER_DEVICE_FINDBYUSERUUID_ERROR.code
-            developer_message = AuthError.USER_DEVICE_FINDBYUSERUUID_ERROR.developer_message
-            raise UserDeviceNotFoundException(error=error_message, error_code=error_code,
-                                              developer_message=developer_message)
-        else:
-            error_message = AuthError.USER_DEVICE_FINDBYUSERUUID_ERROR.message
-            developer_message = "%s. Find by specified email return more than 1 object. This is CAN NOT be! Something " \
-                                "really bad with database." % AuthError.USER_DEVICE_FINDBYUSERUUID_ERROR.developer_message
-            error_code = AuthError.USER_DEVICE_FINDBYUSERUUID_ERROR.code
-            raise UserDeviceException(error=error_message, error_code=error_code, developer_message=developer_message)
+        user_device_list = []
+        for user_device_db in user_device_list_db:
+            user_device = self.__map_user_devicedb_to_user_device(user_device_db=user_device_db)
+            user_device_list.append(user_device)
 
-        return self.__map_user_devicedb_to_user_device(user_device_db=user_device_db)
+        return user_device_list
 
     def find_all(self) -> Optional[List[UserDevice]]:
         logging.info('Find all UserDevices')
@@ -387,9 +377,6 @@ class UserDeviceDB(UserDeviceStored):
         for user_device_db in user_device_db_list:
             user_device = self.__map_user_devicedb_to_user_device(user_device_db=user_device_db)
             user_device_list.append(user_device)
-
-        if len(user_device_list) == 0:
-            logging.warning('Empty UserDevice list of method find_all. Very strange behaviour.')
 
         return user_device_list
 
