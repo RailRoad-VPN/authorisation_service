@@ -55,6 +55,7 @@ class UserDeviceAPI(ResourceAPI):
         user_uuid = request_json.get(UserDeviceDB._user_uuid_field, None)
         device_id = request_json.get(UserDeviceDB._device_id_field, None)
         device_token = request_json.get(UserDeviceDB._device_token_field, None)
+        device_os = request_json.get(UserDeviceDB._device_os_field, None)
         location = request_json.get(UserDeviceDB._location_field, None)
         is_active = request_json.get(UserDeviceDB._is_active_field, False)
 
@@ -76,7 +77,7 @@ class UserDeviceAPI(ResourceAPI):
 
         user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, user_uuid=user_uuid,
                                       device_id=device_id, device_token=device_token, location=location,
-                                      is_active=is_active)
+                                      device_os=device_os, is_active=is_active)
         try:
             suuid = user_device_db.create()
         except UserDeviceException as e:
@@ -92,7 +93,7 @@ class UserDeviceAPI(ResourceAPI):
         response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.CREATED)
         resp = make_api_response(data=response_data, http_code=HTTPStatus.CREATED)
         api_url = self.__api_url__.replace('<string:user_uuid>', user_uuid)
-        resp.headers['Location'] = '%s/%s/%s' % (self._config['API_BASE_URI'], api_url, suuid)
+        resp.headers['Location'] = f"{self._config['API_BASE_URI']}/{api_url}/{suuid}"
         resp.headers['X-Device-Token'] = device_token
         return resp
 
@@ -112,6 +113,7 @@ class UserDeviceAPI(ResourceAPI):
 
         device_token = request_json.get(UserDeviceDB._device_token_field, None)
         device_id = request_json.get(UserDeviceDB._device_id_field, None)
+        device_os = request_json.get(UserDeviceDB._device_os_field, None)
         location = request_json.get(UserDeviceDB._location_field, None)
         is_active = request_json.get(UserDeviceDB._is_active_field, None)
         modify_reason = request_json.get(UserDeviceDB._modify_reason_field, None)
@@ -133,7 +135,7 @@ class UserDeviceAPI(ResourceAPI):
 
         user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, suuid=suuid, user_uuid=user_uuid,
                                       device_token=device_token, device_id=device_id, location=location,
-                                      is_active=is_active, modify_reason=modify_reason)
+                                      device_os=device_os, is_active=is_active, modify_reason=modify_reason)
         try:
             user_device_db.update()
         except UserDeviceException as e:
@@ -166,7 +168,7 @@ class UserDeviceAPI(ResourceAPI):
         if suuid is None:
             # find all user devices is no parameter set
             try:
-                user_device_list = user_device_db.find_all()
+                user_device_list = user_device_db.find_by_user_uuid()
                 user_device_list_dict = [user_device_list[i].to_api_dict() for i in range(0, len(user_device_list))]
                 response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK,
                                             data=user_device_list_dict, limit=self.pagination.limit,

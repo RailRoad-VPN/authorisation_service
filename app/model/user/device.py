@@ -298,7 +298,7 @@ class UserDeviceDB(UserDeviceStored):
 
         return self.__map_user_devicedb_to_user_device(user_device_db=user_device_db)
 
-    def find_by_user_uuid(self) -> Optional[UserDevice]:
+    def find_by_user_uuid(self) -> UserDevice:
         logging.info('Find UserDevice by device_token')
         select_sql = '''
                         SELECT 
