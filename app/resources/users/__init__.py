@@ -115,6 +115,7 @@ class UserAPI(ResourceAPI):
         pin_code = request_json.get(UserDB._pin_code_field, None)
         pin_code_expire_date = request_json.get(UserDB._pin_code_expire_date_field, None)
         modify_reason = request_json.get(UserDB._modify_reason_field, None)
+        is_pin_code_activated = request_json.get(UserDB._is_pin_code_activated_field, None)
 
         req_fields = {
             'email': email,
@@ -136,7 +137,7 @@ class UserAPI(ResourceAPI):
         user_db = UserDB(storage_service=self.__db_storage_service, suuid=user_uuid, email=email,
                          is_password_expired=is_password_expired, password=password, is_expired=is_expired,
                          is_locked=is_locked, enabled=enabled, modify_reason=modify_reason, pin_code=pin_code,
-                         pin_code_expire_date=pin_code_expire_date)
+                         pin_code_expire_date=pin_code_expire_date, is_pin_code_activated=is_pin_code_activated)
         try:
             user_db.update()
         except UserException as e:
