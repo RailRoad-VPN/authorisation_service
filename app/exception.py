@@ -52,6 +52,7 @@ class AuthError(APIErrorEnum):
     USER_DEVICE_FINDBYUSERUUID_ERROR = (name + str(count()), 'USER_DEVICE_FINDBYUSERUUID_ERROR phrase', 'USER_DEVICE_FINDBYUSERUUID_ERROR description')
     USER_DEVICE_FINDALL_ERROR_DB = (name + str(count()), 'USER_DEVICE_FINDALL_ERROR_DB phrase', 'USER_DEVICE_FINDALL_ERROR_DB description')
     USER_DEVICE_UPDATE_BYPINCODE_ERROR_DB = (name + str(count()), 'USER_DEVICE_UPDATE_BYPINCODE_ERROR_DB phrase', 'USER_DEVICE_UPDATE_BYPINCODE_ERROR_DB description')
+    USER_DEVICE_DELETE_ERROR_DB = (name + str(count()), 'USER_DEVICE_DELETE_ERROR_DB phrase', 'USER_DEVICE_DELETE_ERROR_DB description')
 
 
 class AuthException(Exception):

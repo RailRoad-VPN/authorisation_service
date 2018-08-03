@@ -195,6 +195,33 @@ class UserDeviceDB(UserDeviceStored):
             error_code = AuthError.USER_DEVICE_UPDATE_ERROR_DB.code
             raise UserDeviceException(error=error_message, error_code=error_code, developer_message=developer_message)
 
+    def delete(self):
+        logging.info('delete UserDevice')
+
+        delete_sql = '''
+                      DELETE FROM public.user_device WHERE uuid = ?;
+                     '''
+
+        logging.debug('delete SQL: %s' % delete_sql)
+
+        params = (self._suuid,)
+        try:
+            logging.debug("Call database service")
+            self._storage_service.delete(sql=delete_sql, data=params)
+        except DatabaseError as e:
+            self._storage_service.rollback()
+            logging.error(e)
+            try:
+                e = e.args[0]
+            except IndexError:
+                pass
+            error_message = AuthError.USER_DEVICE_DELETE_ERROR_DB.message
+            developer_message = "%s. DatabaseError. Something wrong with database or SQL is broken. " \
+                                "Code: %s . %s" % (
+                                    AuthError.USER_DEVICE_DELETE_ERROR_DB.developer_message, e.pgcode, e.pgerror)
+            error_code = AuthError.USER_DEVICE_DELETE_ERROR_DB.code
+            raise UserDeviceException(error=error_message, error_code=error_code, developer_message=developer_message)
+
     def find_by_suuid(self) -> Optional[UserDevice]:
         logging.info('Find UserDevice by uuid')
         select_sql = '''

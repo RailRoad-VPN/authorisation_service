@@ -37,7 +37,7 @@ class UserDeviceAPI(ResourceAPI):
         url = "%s/%s" % (base_url, UserDeviceAPI.__api_url__)
         api_urls = [
             APIResourceURL(base_url=url, resource_name='', methods=['GET', 'POST', 'PUT']),
-            APIResourceURL(base_url=url, resource_name='<string:suuid>', methods=['GET', 'PUT']),
+            APIResourceURL(base_url=url, resource_name='<string:suuid>', methods=['GET', 'PUT', 'DELETE']),
         ]
         return api_urls
 
@@ -218,3 +218,26 @@ class UserDeviceAPI(ResourceAPI):
                 return resp
         else:
             return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.UNKNOWN_ERROR_CODE)
+
+    def delete(self, user_uuid: str, suuid: str) -> Response:
+        is_valid_a = check_uuid(suuid=suuid)
+        is_valid_b = check_uuid(suuid=user_uuid)
+        if not is_valid_a or not is_valid_b:
+            return make_error_request_response(HTTPStatus.NOT_FOUND, err=AuthError.BAD_IDENTITY_ERROR)
+
+        user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, suuid=suuid, user_uuid=user_uuid)
+        try:
+            user_device_db.delete()
+            response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK)
+            resp = make_api_response(data=response_data, http_code=HTTPStatus.OK)
+            return resp
+        except UserDeviceException as e:
+            logging.error(e)
+            http_code = HTTPStatus.BAD_REQUEST
+            error = e.error
+            error_code = e.error_code
+            developer_message = e.developer_message
+            response_data = APIResponse(status=APIResponseStatus.failed.status, code=http_code, error=error,
+                                        developer_message=developer_message, error_code=error_code)
+            resp = make_api_response(data=response_data, http_code=http_code)
+            return resp
