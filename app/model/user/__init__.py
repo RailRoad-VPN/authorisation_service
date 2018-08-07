@@ -188,7 +188,6 @@ class UserDB(UserStored):
                       is_password_expired = ?,
                       pin_code = ?,
                       pin_code_expire_date = ?,
-                      modify_date = ?,
                       modify_reason = ?,
                       is_pin_code_activated = ?
                     WHERE 
@@ -206,7 +205,6 @@ class UserDB(UserStored):
             self._is_password_expired,
             self._pin_code,
             self._pin_code_expire_date,
-            self._modify_date,
             self._modify_reason,
             self._is_pin_code_activated,
             self._suuid
