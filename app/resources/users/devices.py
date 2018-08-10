@@ -55,13 +55,16 @@ class UserDeviceAPI(ResourceAPI):
         user_uuid = request_json.get(UserDeviceDB._user_uuid_field, None)
         device_id = request_json.get(UserDeviceDB._device_id_field, None)
         device_token = request_json.get(UserDeviceDB._device_token_field, None)
-        device_os = request_json.get(UserDeviceDB._device_os_field, None)
+        platform_id = request_json.get(UserDeviceDB._platform_id_field, None)
+        vpn_type_id = request_json.get(UserDeviceDB._vpn_type_id_field, None)
         location = request_json.get(UserDeviceDB._location_field, None)
         is_active = request_json.get(UserDeviceDB._is_active_field, False)
 
         req_fields = {
             'user_uuid': user_uuid,
             'device_id': device_id,
+            'platform_id': platform_id,
+            'vpn_type_id': vpn_type_id,
             'is_active': is_active,
         }
 
@@ -77,7 +80,7 @@ class UserDeviceAPI(ResourceAPI):
 
         user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, user_uuid=user_uuid,
                                       device_id=device_id, device_token=device_token, location=location,
-                                      device_os=device_os, is_active=is_active)
+                                      platform_id=platform_id, vpn_type_id=vpn_type_id, is_active=is_active)
         try:
             suuid = user_device_db.create()
         except UserDeviceException as e:
@@ -113,7 +116,8 @@ class UserDeviceAPI(ResourceAPI):
 
         device_token = request_json.get(UserDeviceDB._device_token_field, None)
         device_id = request_json.get(UserDeviceDB._device_id_field, None)
-        device_os = request_json.get(UserDeviceDB._device_os_field, None)
+        platform_id = request_json.get(UserDeviceDB._platform_id_field, None)
+        vpn_type_id = request_json.get(UserDeviceDB._vpn_type_id_field, None)
         location = request_json.get(UserDeviceDB._location_field, None)
         is_active = request_json.get(UserDeviceDB._is_active_field, None)
         modify_reason = request_json.get(UserDeviceDB._modify_reason_field, None)
@@ -122,6 +126,8 @@ class UserDeviceAPI(ResourceAPI):
             'user_uuid': user_uuid,
             'device_token': device_token,
             'device_id': device_id,
+            'platform_id': platform_id,
+            'vpn_type_id': vpn_type_id,
             'is_active': is_active,
             'modify_reason': modify_reason,
         }
@@ -135,7 +141,8 @@ class UserDeviceAPI(ResourceAPI):
 
         user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, suuid=suuid, user_uuid=user_uuid,
                                       device_token=device_token, device_id=device_id, location=location,
-                                      device_os=device_os, is_active=is_active, modify_reason=modify_reason)
+                                      platform_id=platform_id, vpn_type_id=vpn_type_id, is_active=is_active,
+                                      modify_reason=modify_reason)
         try:
             user_device_db.update()
         except UserDeviceException as e:
