@@ -36,9 +36,10 @@ CREATE TABLE public.user_device
 (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL
   , user_uuid UUID REFERENCES public.user(uuid) NOT NULL
-  , device_token VARCHAR(256)
+  , device_token VARCHAR(256) UNIQUE
   , device_id VARCHAR(500)
-  , device_os VARCHAR(500)
+  , platform_id INT NOT NULL
+  , vpn_type_id INT NOT NULL
   , location VARCHAR(256)
   , is_active BOOLEAN DEFAULT FALSE NOT NULL
   , modify_date TIMESTAMP NOT NULL DEFAULT now()
