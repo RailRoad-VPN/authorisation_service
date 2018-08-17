@@ -7,8 +7,8 @@ from pprint import pprint
 from flask import Flask, request
 
 from app.exception import AuthError
-from app.resources.users import UserAPI
-from app.resources.users.devices import UserDeviceAPI
+from app.resources.users import UsersAPI
+from app.resources.users.devices import UsersDevicesAPI
 
 sys.path.insert(0, '../psql_library')
 from psql_helper import PostgreSQL
@@ -38,8 +38,8 @@ with app.app_context():
 db_storage_service = DBStorageService(psql=psql)
 
 apis = [
-    {'cls': UserAPI, 'args': [db_storage_service, app_config]},
-    {'cls': UserDeviceAPI, 'args': [db_storage_service, app_config]},
+    {'cls': UsersAPI, 'args': [db_storage_service, app_config]},
+    {'cls': UsersDevicesAPI, 'args': [db_storage_service, app_config]},
 ]
 
 register_api(app, api_base_uri, apis)

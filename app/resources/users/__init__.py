@@ -18,11 +18,13 @@ from api import ResourceAPI
 from response import APIResponseStatus, APIResponse
 from rest import APIResourceURL
 
+logger = logging.getLogger(__name__)
 
-class UserAPI(ResourceAPI):
+
+class UsersAPI(ResourceAPI):
     __version__ = 1
 
-    __endpoint_name__ = 'UserAPI'
+    __endpoint_name__ = __qualname__
     __api_url__ = 'users'
 
     _config = None
@@ -31,7 +33,7 @@ class UserAPI(ResourceAPI):
 
     @staticmethod
     def get_api_urls(base_url: str) -> List[APIResourceURL]:
-        url = f"{base_url}/{UserAPI.__api_url__}"
+        url = f"{base_url}/{UsersAPI.__api_url__}"
         api_urls = [
             APIResourceURL(base_url=url, resource_name='', methods=['GET', 'POST']),
             APIResourceURL(base_url=url, resource_name='<string:suuid>', methods=['PUT']),
@@ -157,7 +159,7 @@ class UserAPI(ResourceAPI):
         return resp
 
     def get(self, suuid: str = None, email: str = None, pin_code: str = None) -> Response:
-        super(UserAPI, self).get(req=request)
+        super(UsersAPI, self).get(req=request)
 
         if suuid is not None:
             is_valid = check_uuid(suuid=suuid)
