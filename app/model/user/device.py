@@ -82,7 +82,7 @@ class UserDeviceStored(StoredObject, UserDevice):
                  location: str = None, is_active: bool = None, modify_reason: str = None, created_date: datetime = None,
                  limit: int = None, offset: int = None, **kwargs):
         StoredObject.__init__(self, storage_service=storage_service, limit=limit, offset=offset)
-        UserDevice.__init__(self, suuid=suuid, user_uuid=user_uuid, device_token=device_token,
+        UserDevice.__init__(self, suuid=suuid, user_uuid=user_uuid, device_token=device_token, vpn_type_id=vpn_type_id,
                             device_id=device_id, platform_id=platform_id, location=location, is_active=is_active,
                             modify_reason=modify_reason, created_date=created_date)
 
