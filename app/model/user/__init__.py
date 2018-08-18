@@ -11,6 +11,8 @@ from app.exception import UserException, AuthError, UserNotFoundException
 sys.path.insert(0, '../psql_library')
 from storage_service import StorageService, StoredObject
 
+logger = logging.getLogger(__name__)
+
 
 class User(object):
     __version__ = 1

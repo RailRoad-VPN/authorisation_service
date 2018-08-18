@@ -38,10 +38,14 @@ CREATE TABLE public.user_device
   , user_uuid UUID REFERENCES public.user(uuid) NOT NULL
   , device_token VARCHAR(256) UNIQUE
   , device_id VARCHAR(500)
+  , virtual_ip INET NOT NULL
+  , device_ip INET
   , platform_id INT NOT NULL
   , vpn_type_id INT NOT NULL
   , location VARCHAR(256)
-  , is_active BOOLEAN DEFAULT FALSE NOT NULL
+  , is_active BOOLEAN DEFAULT TRUE NOT NULL
+  , is_connected BOOLEAN DEFAULT FALSE NOT NULL
+  , connected_since TIMESTAMP
   , modify_date TIMESTAMP NOT NULL DEFAULT now()
   , modify_reason TEXT NOT NULL DEFAULT 'init'
   , created_date TIMESTAMP DEFAULT NOW() NOT NULL

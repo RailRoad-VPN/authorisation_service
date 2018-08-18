@@ -11,6 +11,8 @@ from app.exception import UserDeviceException, AuthError, UserDeviceNotFoundExce
 sys.path.insert(0, '../psql_library')
 from storage_service import StorageService, StoredObject
 
+logger = logging.getLogger(__name__)
+
 
 class UserDevice(object):
     __version__ = 1
@@ -19,26 +21,34 @@ class UserDevice(object):
     _user_uuid = None
     _device_token = None
     _device_id = None
+    _virtual_ip = None
+    _device_ip = None
     _platform_id = None
     _vpn_type_id = None
     _location = None
     _is_active = None
+    _is_connected = None
+    _connected_since = None
     _modify_reason = None
     _modify_date = None
     _created_date = None
 
-    def __init__(self, suuid: str = None, user_uuid: str = None, device_token: str = None,
-                 device_id: str = None, platform_id: int = None, vpn_type_id: int = None, location: str = None,
-                 is_active: bool = None, modify_reason: str = None, modify_date: datetime = None,
-                 created_date: datetime = None):
+    def __init__(self, suuid: str = None, user_uuid: str = None, device_token: str = None, virtual_ip: str = None,
+                 device_ip: str = None, device_id: str = None, platform_id: int = None, vpn_type_id: int = None,
+                 location: str = None, is_active: bool = None, is_connected: bool = None, connected_since: datetime = None,
+                 modify_reason: str = None, modify_date: datetime = None, created_date: datetime = None):
         self._suuid = suuid
         self._user_uuid = user_uuid
         self._device_token = device_token
         self._device_id = device_id
+        self._virtual_ip = virtual_ip
+        self._device_ip = device_ip
         self._platform_id = platform_id
         self._vpn_type_id = vpn_type_id
         self._location = location
         self._is_active = is_active
+        self._is_connected = is_connected
+        self._connected_since = connected_since
         self._modify_reason = modify_reason
         self._modify_date = modify_date
         self._created_date = created_date
@@ -49,10 +59,14 @@ class UserDevice(object):
             'user_uuid': str(self._user_uuid),
             'device_token': self._device_token,
             'device_id': self._device_id,
+            'virtual_ip': self._virtual_ip,
+            'device_ip': self._device_ip,
             'platform_id': self._platform_id,
             'vpn_type_id': self._vpn_type_id,
             'location': self._location,
             'is_active': self._is_active,
+            'is_connected': self._is_connected,
+            'connected_since': str(self._connected_since),
             'modify_reason': self._modify_reason,
             'modify_date': str(self._modify_date),
             'created_date': str(self._created_date),
@@ -64,10 +78,14 @@ class UserDevice(object):
             'user_uuid': str(self._user_uuid),
             'device_token': self._device_token,
             'device_id': self._device_id,
+            'virtual_ip': self._virtual_ip,
+            'device_ip': self._device_ip,
             'platform_id': self._platform_id,
             'vpn_type_id': self._vpn_type_id,
             'location': self._location,
             'is_active': self._is_active,
+            'is_connected': self._is_connected,
+            'connected_since': str(self._connected_since),
             'modify_reason': self._modify_reason,
             'modify_date': str(self._modify_date),
             'created_date': str(self._created_date),
@@ -78,13 +96,15 @@ class UserDeviceStored(StoredObject, UserDevice):
     __version__ = 1
 
     def __init__(self, storage_service: StorageService, suuid: str = None, user_uuid: str = None,
-                 device_token: str = None, device_id: str = None, platform_id: str = None, vpn_type_id: int = None,
-                 location: str = None, is_active: bool = None, modify_reason: str = None, created_date: datetime = None,
-                 limit: int = None, offset: int = None, **kwargs):
+                 device_token: str = None, device_id: str = None, virtual_ip: str = None, device_ip: str = None,
+                 platform_id: str = None, vpn_type_id: int = None, location: str = None, is_active: bool = None,
+                 is_connected: bool = None, connected_since: datetime = None, modify_reason: str = None,
+                 created_date: datetime = None, limit: int = None, offset: int = None, **kwargs):
         StoredObject.__init__(self, storage_service=storage_service, limit=limit, offset=offset)
         UserDevice.__init__(self, suuid=suuid, user_uuid=user_uuid, device_token=device_token, vpn_type_id=vpn_type_id,
-                            device_id=device_id, platform_id=platform_id, location=location, is_active=is_active,
-                            modify_reason=modify_reason, created_date=created_date)
+                            device_id=device_id, virtual_ip=virtual_ip, device_ip=device_ip, platform_id=platform_id,
+                            location=location, is_active=is_active, is_connected=is_connected,
+                            connected_since=connected_since, modify_reason=modify_reason, created_date=created_date)
 
 
 class UserDeviceDB(UserDeviceStored):
@@ -94,10 +114,14 @@ class UserDeviceDB(UserDeviceStored):
     _user_uuid_field = 'user_uuid'
     _device_token_field = 'device_token'
     _device_id_field = 'device_id'
+    _virtual_ip_field = 'virtual_ip'
+    _device_ip_field = 'device_ip'
     _platform_id_field = 'platform_id'
     _vpn_type_id_field = 'vpn_type_id'
     _location_field = 'location'
     _is_active_field = 'is_active'
+    _is_connected_field = 'is_connected'
+    _connected_since_field = 'connected_since'
     _modify_reason_field = 'modify_reason'
     _modify_date_field = 'modify_date'
     _created_date_field = 'created_date'
@@ -115,23 +139,31 @@ class UserDeviceDB(UserDeviceStored):
                                 user_uuid,
                                 device_token,
                                 device_id,
+                                virtual_ip,
+                                device_ip,
                                 platform_id,
                                 vpn_type_id,
                                 location,
-                                is_active
+                                is_active,
+                                is_connected,
+                                connected_since
                             ) 
                           VALUES 
-                            (?, ?, ?, ?, ?, ?, ?, ?)
+                            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         '''
         create_user_device_params = (
             self._suuid,
             self._user_uuid,
             self._device_token,
             self._device_id,
+            self._virtual_ip,
+            self._device_ip,
             self._platform_id,
             self._vpn_type_id,
             self._location,
             self._is_active,
+            self._is_connected,
+            self._connected_since,
         )
         logging.debug('Create UserDevice SQL : %s' % create_user_device_sql)
 
@@ -166,10 +198,14 @@ class UserDeviceDB(UserDeviceStored):
                       user_uuid = ?,
                       device_token = ?,
                       device_id = ?,
+                      virtual_ip = ?,
+                      device_ip = ?,
                       platform_id = ?,
                       vpn_type_id = ?,
                       location = ?,
                       is_active = ?,
+                      is_connected = ?,
+                      connected_since = ?,
                       modify_reason = ?
                     WHERE 
                       uuid = ?;
@@ -181,10 +217,14 @@ class UserDeviceDB(UserDeviceStored):
             self._user_uuid,
             self._device_token,
             self._device_id,
+            self._virtual_ip,
+            self._device_ip,
             self._platform_id,
             self._vpn_type_id,
             self._location,
             self._is_active,
+            self._is_connected,
+            self._connected_since,
             self._modify_reason,
             self._suuid,
         )
@@ -240,10 +280,14 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
+                            virtual_ip,
+                            device_ip,
                             platform_id,
                             vpn_type_id,
                             location,
                             is_active,
+                            is_connected,
+                            to_json(connected_since)  AS connected_since,
                             modify_reason,
                             to_json(modify_date) AS modify_date,
                             to_json(created_date) AS created_date
@@ -292,10 +336,14 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
+                            virtual_ip,
+                            device_ip,
                             platform_id,
                             vpn_type_id,
                             location,
                             is_active,
+                            is_connected,
+                            to_json(connected_since)  AS connected_since,
                             modify_reason,
                             to_json(modify_date) AS modify_date,
                             to_json(created_date) AS created_date
@@ -345,10 +393,14 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
+                            virtual_ip,
+                            device_ip,
                             platform_id,
                             vpn_type_id,
                             location,
                             is_active,
+                            is_connected,
+                            to_json(connected_since)  AS connected_since,
                             modify_reason,
                             to_json(modify_date) AS modify_date,
                             to_json(created_date) AS created_date
@@ -388,10 +440,14 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
+                            virtual_ip,
+                            device_ip,
                             platform_id,
                             vpn_type_id,
                             location,
                             is_active,
+                            is_connected,
+                            to_json(connected_since)  AS connected_since,
                             modify_reason,
                             to_json(modify_date) AS modify_date,
                             to_json(created_date) AS created_date
@@ -426,10 +482,14 @@ class UserDeviceDB(UserDeviceStored):
                           user_uuid=user_device_db[self._user_uuid_field],
                           device_token=user_device_db[self._device_token_field],
                           device_id=user_device_db[self._device_id_field],
+                          virtual_ip=user_device_db[self._virtual_ip_field],
+                          device_ip=user_device_db[self._device_ip_field],
                           platform_id=user_device_db[self._platform_id_field],
                           vpn_type_id=user_device_db[self._vpn_type_id_field],
                           location=user_device_db[self._location_field],
                           is_active=user_device_db[self._is_active_field],
+                          is_connected=user_device_db[self._is_connected_field],
+                          connected_since=user_device_db[self._connected_since_field],
                           modify_reason=user_device_db[self._modify_reason_field],
                           modify_date=user_device_db[self._modify_date_field],
                           created_date=user_device_db[self._created_date_field])
