@@ -44,7 +44,6 @@ CREATE TABLE public.user_device
   , vpn_type_id INT NOT NULL
   , location VARCHAR(256)
   , is_active BOOLEAN DEFAULT TRUE NOT NULL
-  , is_connected BOOLEAN DEFAULT FALSE NOT NULL
   , connected_since TIMESTAMP
   , modify_date TIMESTAMP NOT NULL DEFAULT now()
   , modify_reason TEXT NOT NULL DEFAULT 'init'

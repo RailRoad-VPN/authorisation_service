@@ -27,7 +27,6 @@ class UserDevice(object):
     _vpn_type_id = None
     _location = None
     _is_active = None
-    _is_connected = None
     _connected_since = None
     _modify_reason = None
     _modify_date = None
@@ -35,7 +34,7 @@ class UserDevice(object):
 
     def __init__(self, suuid: str = None, user_uuid: str = None, device_token: str = None, virtual_ip: str = None,
                  device_ip: str = None, device_id: str = None, platform_id: int = None, vpn_type_id: int = None,
-                 location: str = None, is_active: bool = None, is_connected: bool = None, connected_since: datetime = None,
+                 location: str = None, is_active: bool = None, connected_since: datetime = None,
                  modify_reason: str = None, modify_date: datetime = None, created_date: datetime = None):
         self._suuid = suuid
         self._user_uuid = user_uuid
@@ -47,7 +46,6 @@ class UserDevice(object):
         self._vpn_type_id = vpn_type_id
         self._location = location
         self._is_active = is_active
-        self._is_connected = is_connected
         self._connected_since = connected_since
         self._modify_reason = modify_reason
         self._modify_date = modify_date
@@ -65,7 +63,6 @@ class UserDevice(object):
             'vpn_type_id': self._vpn_type_id,
             'location': self._location,
             'is_active': self._is_active,
-            'is_connected': self._is_connected,
             'connected_since': str(self._connected_since),
             'modify_reason': self._modify_reason,
             'modify_date': str(self._modify_date),
@@ -84,7 +81,6 @@ class UserDevice(object):
             'vpn_type_id': self._vpn_type_id,
             'location': self._location,
             'is_active': self._is_active,
-            'is_connected': self._is_connected,
             'connected_since': str(self._connected_since),
             'modify_reason': self._modify_reason,
             'modify_date': str(self._modify_date),
@@ -98,13 +94,13 @@ class UserDeviceStored(StoredObject, UserDevice):
     def __init__(self, storage_service: StorageService, suuid: str = None, user_uuid: str = None,
                  device_token: str = None, device_id: str = None, virtual_ip: str = None, device_ip: str = None,
                  platform_id: str = None, vpn_type_id: int = None, location: str = None, is_active: bool = None,
-                 is_connected: bool = None, connected_since: datetime = None, modify_reason: str = None,
+                 connected_since: datetime = None, modify_reason: str = None,
                  created_date: datetime = None, limit: int = None, offset: int = None, **kwargs):
         StoredObject.__init__(self, storage_service=storage_service, limit=limit, offset=offset)
         UserDevice.__init__(self, suuid=suuid, user_uuid=user_uuid, device_token=device_token, vpn_type_id=vpn_type_id,
                             device_id=device_id, virtual_ip=virtual_ip, device_ip=device_ip, platform_id=platform_id,
-                            location=location, is_active=is_active, is_connected=is_connected,
-                            connected_since=connected_since, modify_reason=modify_reason, created_date=created_date)
+                            location=location, is_active=is_active, connected_since=connected_since,
+                            modify_reason=modify_reason, created_date=created_date)
 
 
 class UserDeviceDB(UserDeviceStored):
@@ -120,7 +116,6 @@ class UserDeviceDB(UserDeviceStored):
     _vpn_type_id_field = 'vpn_type_id'
     _location_field = 'location'
     _is_active_field = 'is_active'
-    _is_connected_field = 'is_connected'
     _connected_since_field = 'connected_since'
     _modify_reason_field = 'modify_reason'
     _modify_date_field = 'modify_date'
@@ -145,11 +140,10 @@ class UserDeviceDB(UserDeviceStored):
                                 vpn_type_id,
                                 location,
                                 is_active,
-                                is_connected,
                                 connected_since
                             ) 
                           VALUES 
-                            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         '''
         create_user_device_params = (
             self._suuid,
@@ -162,7 +156,6 @@ class UserDeviceDB(UserDeviceStored):
             self._vpn_type_id,
             self._location,
             self._is_active,
-            self._is_connected,
             self._connected_since,
         )
         logging.debug('Create UserDevice SQL : %s' % create_user_device_sql)
@@ -204,7 +197,6 @@ class UserDeviceDB(UserDeviceStored):
                       vpn_type_id = ?,
                       location = ?,
                       is_active = ?,
-                      is_connected = ?,
                       connected_since = ?,
                       modify_reason = ?
                     WHERE 
@@ -223,7 +215,6 @@ class UserDeviceDB(UserDeviceStored):
             self._vpn_type_id,
             self._location,
             self._is_active,
-            self._is_connected,
             self._connected_since,
             self._modify_reason,
             self._suuid,
@@ -286,7 +277,6 @@ class UserDeviceDB(UserDeviceStored):
                             vpn_type_id,
                             location,
                             is_active,
-                            is_connected,
                             to_json(connected_since)  AS connected_since,
                             modify_reason,
                             to_json(modify_date) AS modify_date,
@@ -342,7 +332,6 @@ class UserDeviceDB(UserDeviceStored):
                             vpn_type_id,
                             location,
                             is_active,
-                            is_connected,
                             to_json(connected_since)  AS connected_since,
                             modify_reason,
                             to_json(modify_date) AS modify_date,
@@ -399,7 +388,6 @@ class UserDeviceDB(UserDeviceStored):
                             vpn_type_id,
                             location,
                             is_active,
-                            is_connected,
                             to_json(connected_since)  AS connected_since,
                             modify_reason,
                             to_json(modify_date) AS modify_date,
@@ -446,7 +434,6 @@ class UserDeviceDB(UserDeviceStored):
                             vpn_type_id,
                             location,
                             is_active,
-                            is_connected,
                             to_json(connected_since)  AS connected_since,
                             modify_reason,
                             to_json(modify_date) AS modify_date,
@@ -488,7 +475,6 @@ class UserDeviceDB(UserDeviceStored):
                           vpn_type_id=user_device_db[self._vpn_type_id_field],
                           location=user_device_db[self._location_field],
                           is_active=user_device_db[self._is_active_field],
-                          is_connected=user_device_db[self._is_connected_field],
                           connected_since=user_device_db[self._connected_since_field],
                           modify_reason=user_device_db[self._modify_reason_field],
                           modify_date=user_device_db[self._modify_date_field],
