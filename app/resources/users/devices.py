@@ -19,11 +19,11 @@ from api import ResourceAPI
 from response import APIResponseStatus, APIResponse
 from rest import APIResourceURL
 
-logger = logging.getLogger(__name__)
-
 
 class UsersDevicesAPI(ResourceAPI):
     __version__ = 1
+
+    logger = logging.getLogger(__name__)
 
     __endpoint_name__ = __qualname__
     __api_url__ = 'users/<string:user_uuid>/devices'
@@ -89,7 +89,7 @@ class UsersDevicesAPI(ResourceAPI):
         try:
             suuid = user_device_db.create()
         except UserDeviceException as e:
-            logging.error(e)
+            self.logger.error(e)
             error_code = e.error_code
             error = e.error
             developer_message = e.developer_message
@@ -157,7 +157,7 @@ class UsersDevicesAPI(ResourceAPI):
         try:
             user_device_db.update()
         except UserDeviceException as e:
-            logging.error(e)
+            self.logger.error(e)
             http_code = HTTPStatus.BAD_REQUEST
             error = e.error
             error_code = e.error_code
@@ -194,7 +194,7 @@ class UsersDevicesAPI(ResourceAPI):
                 resp = make_api_response(data=response_data, http_code=HTTPStatus.OK)
                 return resp
             except UserDeviceException as e:
-                logging.error(e)
+                self.logger.error(e)
                 http_code = HTTPStatus.BAD_REQUEST
                 error = e.error
                 error_code = e.error_code
@@ -215,7 +215,7 @@ class UsersDevicesAPI(ResourceAPI):
                 resp = make_api_response(data=response_data, http_code=HTTPStatus.OK)
                 return resp
             except UserDeviceNotFoundException as e:
-                logging.error(e)
+                self.logger.error(e)
                 http_code = HTTPStatus.NOT_FOUND
                 error = e.error
                 error_code = e.error_code
@@ -225,7 +225,7 @@ class UsersDevicesAPI(ResourceAPI):
                 resp = make_api_response(data=response_data, http_code=http_code)
                 return resp
             except UserDeviceException as e:
-                logging.error(e)
+                self.logger.error(e)
                 http_code = HTTPStatus.BAD_REQUEST
                 error = e.error
                 error_code = e.error_code
@@ -250,7 +250,7 @@ class UsersDevicesAPI(ResourceAPI):
             resp = make_api_response(data=response_data, http_code=HTTPStatus.OK)
             return resp
         except UserDeviceException as e:
-            logging.error(e)
+            self.logger.error(e)
             http_code = HTTPStatus.BAD_REQUEST
             error = e.error
             error_code = e.error_code

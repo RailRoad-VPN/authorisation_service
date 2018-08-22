@@ -1,9 +1,9 @@
 import datetime
-import logging
 import sys
 import uuid as uuidlib
 from typing import List, Optional
 
+import logging
 from psycopg2._psycopg import DatabaseError
 
 from app.exception import UserException, AuthError, UserNotFoundException
@@ -11,11 +11,11 @@ from app.exception import UserException, AuthError, UserNotFoundException
 sys.path.insert(0, '../psql_library')
 from storage_service import StorageService, StoredObject
 
-logger = logging.getLogger(__name__)
-
 
 class User(object):
     __version__ = 1
+
+    logger = logging.getLogger(__name__)
 
     _suuid = None
     _email = None
@@ -87,6 +87,8 @@ class User(object):
 class UserStored(StoredObject, User):
     __version__ = 1
 
+    logger = logging.getLogger(__name__)
+
     def __init__(self, storage_service: StorageService, suuid: str = None, email: str = None,
                  created_date: datetime = None, password: str = None, is_expired: bool = False, is_locked: bool = False,
                  is_password_expired: bool = False, enabled: bool = False, pin_code: int = None,
@@ -101,6 +103,8 @@ class UserStored(StoredObject, User):
 
 class UserDB(UserStored):
     __version__ = 1
+
+    logger = logging.getLogger(__name__)
 
     _suuid_field = 'uuid'
     _email_field = 'email'
@@ -121,7 +125,7 @@ class UserDB(UserStored):
 
     def create(self) -> str:
         self._suuid = uuidlib.uuid4()
-        logging.info('Create object User with uuid: ' + str(self._suuid))
+        self.logger.info('Create object User with uuid: ' + str(self._suuid))
         create_user_sql = '''
                           INSERT INTO public."user" 
                             (
@@ -151,14 +155,14 @@ class UserDB(UserStored):
             self._pin_code_expire_date,
             self._is_pin_code_activated,
         )
-        logging.debug('Create User SQL : %s' % create_user_sql)
+        self.logger.debug('Create User SQL : %s' % create_user_sql)
 
         try:
-            logging.debug('Call database service')
+            self.logger.debug('Call database service')
             self._storage_service.create(create_user_sql, create_user_params)
         except DatabaseError as e:
             self._storage_service.rollback()
-            logging.error(e)
+            self.logger.error(e)
             try:
                 e = e.args[0]
             except IndexError:
@@ -170,13 +174,13 @@ class UserDB(UserStored):
                                     AuthError.USER_CREATE_ERROR_DB.developer_message, e.pgcode, e.pgerror)
 
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
-        logging.debug('User created.')
+        self.logger.debug('User created.')
 
         return self._suuid
 
     def update(self):
         self._modify_date = datetime.datetime.now()
-        logging.info('Update User')
+        self.logger.info('Update User')
 
         update_sql = '''
                     UPDATE 
@@ -196,7 +200,7 @@ class UserDB(UserStored):
                       uuid = ?;
         '''
 
-        logging.debug('Update SQL: %s' % update_sql)
+        self.logger.debug('Update SQL: %s' % update_sql)
 
         params = (
             self._email,
@@ -213,11 +217,11 @@ class UserDB(UserStored):
         )
 
         try:
-            logging.debug("Call database service")
+            self.logger.debug("Call database service")
             self._storage_service.update(update_sql, params)
         except DatabaseError as e:
             self._storage_service.rollback()
-            logging.error(e)
+            self.logger.error(e)
             try:
                 e = e.args[0]
             except IndexError:
@@ -230,7 +234,7 @@ class UserDB(UserStored):
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
 
     def find_by_suuid(self) -> Optional[User]:
-        logging.info('Find User by uuid')
+        self.logger.info('Find User by uuid')
         select_sql = '''
                         SELECT 
                             uuid,
@@ -251,14 +255,14 @@ class UserDB(UserStored):
                         WHERE 
                             uuid = ?
                     '''
-        logging.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"Select SQL: {select_sql}")
         params = (self._suuid,)
 
         try:
-            logging.debug('Call database service')
+            self.logger.debug('Call database service')
             user_list_db = self._storage_service.get(select_sql, params)
         except DatabaseError as e:
-            logging.error(e)
+            self.logger.error(e)
             error_message = AuthError.USER_FINDBYUUID_ERROR_DB.message
             error_code = AuthError.USER_FINDBYUUID_ERROR_DB.code
             developer_message = "%s. DatabaseError.. " \
@@ -283,7 +287,7 @@ class UserDB(UserStored):
         return self.__map_userdb_to_user(user_db)
 
     def find_by_email(self) -> Optional[User]:
-        logging.info('Find User by email')
+        self.logger.info('Find User by email')
         select_sql = '''
                         SELECT 
                             uuid,
@@ -304,14 +308,14 @@ class UserDB(UserStored):
                         WHERE 
                             email = ?
                     '''
-        logging.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"Select SQL: {select_sql}")
         params = (self._email,)
 
         try:
-            logging.debug('Call database service')
+            self.logger.debug('Call database service')
             user_list_db = self._storage_service.get(select_sql, params)
         except DatabaseError as e:
-            logging.error(e)
+            self.logger.error(e)
             error_message = AuthError.USER_FINDBYEMAIL_ERROR_DB.message
             error_code = AuthError.USER_FINDBYEMAIL_ERROR_DB.code
             developer_message = "%s. DatabaseError.. " \
@@ -336,7 +340,7 @@ class UserDB(UserStored):
         return self.__map_userdb_to_user(user_db)
 
     def find_by_pin_code(self) -> Optional[User]:
-        logging.info('Find User by pin_code')
+        self.logger.info('Find User by pin_code')
         select_sql = '''
                         SELECT 
                             uuid,
@@ -357,14 +361,14 @@ class UserDB(UserStored):
                         WHERE 
                             pin_code = ?
                     '''
-        logging.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"Select SQL: {select_sql}")
         params = (self._pin_code,)
 
         try:
-            logging.debug('Call database service')
+            self.logger.debug('Call database service')
             user_list_db = self._storage_service.get(select_sql, params)
         except DatabaseError as e:
-            logging.error(e)
+            self.logger.error(e)
             error_message = AuthError.USER_FINDBYPINCODE_ERROR_DB.message
             error_code = AuthError.USER_FINDBYPINCODE_ERROR_DB.code
             developer_message = "%s. DatabaseError.. " \
@@ -389,7 +393,7 @@ class UserDB(UserStored):
         return self.__map_userdb_to_user(user_db)
 
     def find_all(self) -> Optional[List[User]]:
-        logging.info('Find all Users')
+        self.logger.info('find_all method')
         select_sql = '''
                         SELECT 
                             uuid,
@@ -410,13 +414,13 @@ class UserDB(UserStored):
                     '''
         if self._limit:
             select_sql += f"\nLIMIT {self._limit}\nOFFSET {self._offset}"
-        logging.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"Select SQL: {select_sql}")
 
         try:
-            logging.debug('Call database service')
+            self.logger.debug('Call database service')
             user_db_list = self._storage_service.get(select_sql)
         except DatabaseError as e:
-            logging.error(e)
+            self.logger.error(e)
             error_message = AuthError.USER_FINDALL_ERROR_DB.message
             error_code = AuthError.USER_FINDALL_ERROR_DB.code
             developer_message = "%s. DatabaseError.. " \
@@ -430,7 +434,7 @@ class UserDB(UserStored):
             user_list.append(user)
 
         if len(user_list) == 0:
-            logging.warning('Empty User list of method find_all. Very strange behaviour.')
+            self.logger.warning('Empty User list of method find_all. Very strange behaviour.')
 
         return user_list
 

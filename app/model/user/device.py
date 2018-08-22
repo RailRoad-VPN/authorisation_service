@@ -11,11 +11,11 @@ from app.exception import UserDeviceException, AuthError, UserDeviceNotFoundExce
 sys.path.insert(0, '../psql_library')
 from storage_service import StorageService, StoredObject
 
-logger = logging.getLogger(__name__)
-
 
 class UserDevice(object):
     __version__ = 1
+
+    logger = logging.getLogger(__name__)
 
     _suuid = None
     _user_uuid = None
@@ -91,6 +91,8 @@ class UserDevice(object):
 class UserDeviceStored(StoredObject, UserDevice):
     __version__ = 1
 
+    logger = logging.getLogger(__name__)
+
     def __init__(self, storage_service: StorageService, suuid: str = None, user_uuid: str = None,
                  device_token: str = None, device_id: str = None, virtual_ip: str = None, device_ip: str = None,
                  platform_id: str = None, vpn_type_id: int = None, location: str = None, is_active: bool = None,
@@ -105,6 +107,8 @@ class UserDeviceStored(StoredObject, UserDevice):
 
 class UserDeviceDB(UserDeviceStored):
     __version__ = 1
+
+    logger = logging.getLogger(__name__)
 
     _suuid_field = 'uuid'
     _user_uuid_field = 'user_uuid'
@@ -126,7 +130,7 @@ class UserDeviceDB(UserDeviceStored):
 
     def create(self) -> str:
         self._suuid = uuidlib.uuid4()
-        logging.info('Create object UserDevice with uuid: ' + str(self._suuid))
+        self.logger.info('Create object UserDevice with uuid: ' + str(self._suuid))
         create_user_device_sql = '''
                           INSERT INTO public.user_device 
                             (
@@ -158,14 +162,14 @@ class UserDeviceDB(UserDeviceStored):
             self._is_active,
             self._connected_since,
         )
-        logging.debug('Create UserDevice SQL : %s' % create_user_device_sql)
+        self.logger.debug('Create UserDevice SQL : %s' % create_user_device_sql)
 
         try:
-            logging.debug('Call database service')
+            self.logger.debug('Call database service')
             self._storage_service.create(sql=create_user_device_sql, data=create_user_device_params)
         except DatabaseError as e:
             self._storage_service.rollback()
-            logging.error(e)
+            self.logger.error(e)
             try:
                 e = e.args[0]
             except IndexError:
@@ -177,12 +181,12 @@ class UserDeviceDB(UserDeviceStored):
                                     AuthError.USER_DEVICE_CREATE_ERROR_DB.developer_message, e.pgcode, e.pgerror)
 
             raise UserDeviceException(error=error_message, error_code=error_code, developer_message=developer_message)
-        logging.debug('UserDevice created.')
+        self.logger.debug('UserDevice created.')
 
         return self._suuid
 
     def update(self):
-        logging.info('Update UserDevice')
+        self.logger.info('Update UserDevice')
 
         update_sql = '''
                     UPDATE 
@@ -203,7 +207,7 @@ class UserDeviceDB(UserDeviceStored):
                       uuid = ?;
         '''
 
-        logging.debug('Update SQL: %s' % update_sql)
+        self.logger.debug('Update SQL: %s' % update_sql)
 
         params = (
             self._user_uuid,
@@ -220,11 +224,11 @@ class UserDeviceDB(UserDeviceStored):
             self._suuid,
         )
         try:
-            logging.debug("Call database service")
+            self.logger.debug("Call database service")
             self._storage_service.update(update_sql, params)
         except DatabaseError as e:
             self._storage_service.rollback()
-            logging.error(e)
+            self.logger.error(e)
             try:
                 e = e.args[0]
             except IndexError:
@@ -237,21 +241,21 @@ class UserDeviceDB(UserDeviceStored):
             raise UserDeviceException(error=error_message, error_code=error_code, developer_message=developer_message)
 
     def delete(self):
-        logging.info('delete UserDevice')
+        self.logger.info('delete UserDevice')
 
         delete_sql = '''
                       DELETE FROM public.user_device WHERE uuid = ?;
                      '''
 
-        logging.debug('delete SQL: %s' % delete_sql)
+        self.logger.debug('delete SQL: %s' % delete_sql)
 
         params = (self._suuid,)
         try:
-            logging.debug("Call database service")
+            self.logger.debug("Call database service")
             self._storage_service.delete(sql=delete_sql, data=params)
         except DatabaseError as e:
             self._storage_service.rollback()
-            logging.error(e)
+            self.logger.error(e)
             try:
                 e = e.args[0]
             except IndexError:
@@ -264,7 +268,7 @@ class UserDeviceDB(UserDeviceStored):
             raise UserDeviceException(error=error_message, error_code=error_code, developer_message=developer_message)
 
     def find_by_suuid(self) -> Optional[UserDevice]:
-        logging.info('Find UserDevice by uuid')
+        self.logger.info('Find UserDevice by uuid')
         select_sql = '''
                         SELECT 
                             uuid,
@@ -286,14 +290,14 @@ class UserDeviceDB(UserDeviceStored):
                         WHERE 
                             uuid = ?
                     '''
-        logging.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"Select SQL: {select_sql}")
         params = (self._suuid,)
 
         try:
-            logging.debug('Call database service')
+            self.logger.debug('Call database service')
             user_device_list_db = self._storage_service.get(select_sql, params)
         except DatabaseError as e:
-            logging.error(e)
+            self.logger.error(e)
             error_message = AuthError.USER_DEVICE_FINDBYUUID_ERROR_DB.message
             error_code = AuthError.USER_DEVICE_FINDBYUUID_ERROR_DB.code
             developer_message = "%s. DatabaseError.. " \
@@ -319,7 +323,7 @@ class UserDeviceDB(UserDeviceStored):
         return self.__map_user_devicedb_to_user_device(user_device_db=user_device_db)
 
     def find_by_device_token(self) -> Optional[UserDevice]:
-        logging.info('Find UserDevice by device_token')
+        self.logger.info('Find UserDevice by device_token')
         select_sql = '''
                         SELECT 
                             uuid,
@@ -341,14 +345,14 @@ class UserDeviceDB(UserDeviceStored):
                         WHERE 
                             device_token = ?
                     '''
-        logging.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"Select SQL: {select_sql}")
         params = (self._device_token,)
 
         try:
-            logging.debug('Call database service')
+            self.logger.debug('Call database service')
             user_device_list_db = self._storage_service.get(select_sql, params)
         except DatabaseError as e:
-            logging.error(e)
+            self.logger.error(e)
             error_message = AuthError.USER_DEVICE_FINDBYDEVICETOKEN_ERROR_DB.message
             error_code = AuthError.USER_DEVICE_FINDBYDEVICETOKEN_ERROR_DB.code
             developer_message = "%s. DatabaseError.. " \
@@ -375,7 +379,7 @@ class UserDeviceDB(UserDeviceStored):
         return self.__map_user_devicedb_to_user_device(user_device_db=user_device_db)
 
     def find_by_user_uuid(self) -> List[UserDevice]:
-        logging.info('Find UserDevice by device_token')
+        self.logger.info('Find UserDevice by device_token')
         select_sql = '''
                         SELECT 
                             uuid,
@@ -397,14 +401,14 @@ class UserDeviceDB(UserDeviceStored):
                         WHERE 
                             user_uuid = ?
                     '''
-        logging.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"Select SQL: {select_sql}")
         params = (self._user_uuid,)
 
         try:
-            logging.debug('Call database service')
+            self.logger.debug('Call database service')
             user_device_list_db = self._storage_service.get(select_sql, params)
         except DatabaseError as e:
-            logging.error(e)
+            self.logger.error(e)
             error_message = AuthError.USER_DEVICE_FINDBYUSERUUID_ERROR_DB.message
             error_code = AuthError.USER_DEVICE_FINDBYUSERUUID_ERROR_DB.code
             developer_message = "%s. DatabaseError.. " \
@@ -421,7 +425,7 @@ class UserDeviceDB(UserDeviceStored):
         return user_device_list
 
     def find_all(self) -> Optional[List[UserDevice]]:
-        logging.info('Find all UserDevices')
+        self.logger.info('Find all UserDevices')
         select_sql = '''
                         SELECT 
                             uuid,
@@ -443,13 +447,13 @@ class UserDeviceDB(UserDeviceStored):
                     '''
         if self._limit:
             select_sql += "LIMIT %s\nOFFSET %s" % (self._limit, self._offset)
-        logging.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"Select SQL: {select_sql}")
 
         try:
-            logging.debug('Call database service')
+            self.logger.debug('Call database service')
             user_device_db_list = self._storage_service.get(select_sql)
         except DatabaseError as e:
-            logging.error(e)
+            self.logger.error(e)
             error_message = AuthError.USER_DEVICE_FINDALL_ERROR_DB.message
             error_code = AuthError.USER_DEVICE_FINDALL_ERROR_DB.code
             developer_message = "%s. DatabaseError.. " \
