@@ -9,7 +9,7 @@ from flask import Flask, request
 from app.exception import AuthError
 from app.resources.users import UsersAPI
 from app.resources.users.devices import UsersDevicesAPI
-from users.vpn_server_configurations import UsersVPNServersConfigurationsAPI
+from app.resources.users.vpn_server_configurations import UsersVPNServersConfigurationsAPI
 
 sys.path.insert(0, '../psql_library')
 from psql_helper import PostgreSQL
