@@ -151,16 +151,7 @@ class UsersVPNServersConfigurationsAPI(ResourceAPI):
                                                           vpn_device_platform_id=platform_id, vpn_type_id=vpn_type_id,
                                                           user_uuid=user_uuid)
         if platform_id is not None and vpn_type_id is not None:
-            is_valid_user_uuid = check_uuid(suuid=user_uuid)
-            if not is_valid_user_uuid:
-                return make_error_request_response(HTTPStatus.BAD_REQUEST,
-                                                   err=AuthError.VPNSERVERCONFIG_IDENTIFIER_ERROR)
-
             # user specific configuration
-            is_valid = check_uuid(suuid=user_uuid)
-            if not is_valid:
-                return make_error_request_response(HTTPStatus.BAD_REQUEST,
-                                                   err=AuthError.VPNSERVERCONFIG_IDENTIFIER_ERROR)
             try:
                 user_vpn_server_config = vpnserverconfig_db.find_by_user_platform_type()
                 response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK,
@@ -221,7 +212,7 @@ class UsersVPNServersConfigurationsAPI(ResourceAPI):
                 resp = make_api_response(data=response_data, http_code=http_code)
                 return resp
         else:
-            # all configurations
+            # all user configurations
             try:
                 user_vpn_server_config_list = vpnserverconfig_db.find()
                 user_vpn_server_config_list_dict = [user_vpn_server_config_list[i].to_api_dict() for i in
