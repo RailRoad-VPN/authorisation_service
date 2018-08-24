@@ -54,6 +54,14 @@ class AuthError(APIErrorEnum):
     USER_DEVICE_UPDATE_BYPINCODE_ERROR_DB = (name + str(count()), 'USER_DEVICE_UPDATE_BYPINCODE_ERROR_DB phrase', 'USER_DEVICE_UPDATE_BYPINCODE_ERROR_DB description')
     USER_DEVICE_DELETE_ERROR_DB = (name + str(count()), 'USER_DEVICE_DELETE_ERROR_DB phrase', 'USER_DEVICE_DELETE_ERROR_DB description')
 
+    USER_VPNSERVERCONFIG_FIND_ERROR_DB = (name + str(count()), 'USER_DEVICE_DELETE_ERROR_DB phrase', 'USER_DEVICE_DELETE_ERROR_DB description')
+    USER_VPNSERVERCONFIG_FIND_BY_UUID_ERROR_DB = (name + str(count()), 'USER_DEVICE_DELETE_ERROR_DB phrase', 'USER_DEVICE_DELETE_ERROR_DB description')
+    USER_VPNSERVERCONFIG_FIND_BY_UUID_ERROR = (name + str(count()), 'USER_DEVICE_DELETE_ERROR_DB phrase', 'USER_DEVICE_DELETE_ERROR_DB description')
+    USER_VPNSERVERCONFIG_FIND_BY_USER_PLATFORM_TYPE_ERROR_DB = (name + str(count()), 'USER_DEVICE_DELETE_ERROR_DB phrase', 'USER_DEVICE_DELETE_ERROR_DB description')
+    USER_VPNSERVERCONFIG_FIND_BY_USER_PLATFORM_TYPE_ERROR = (name + str(count()), 'USER_DEVICE_DELETE_ERROR_DB phrase', 'USER_DEVICE_DELETE_ERROR_DB description')
+    USER_VPNSERVER_CREATE_ERROR_DB = (name + str(count()), 'USER_DEVICE_DELETE_ERROR_DB phrase', 'USER_DEVICE_DELETE_ERROR_DB description')
+    USER_VPNSERVERCONFIG_UPDATE_ERROR_DB = (name + str(count()), 'USER_DEVICE_DELETE_ERROR_DB phrase', 'USER_DEVICE_DELETE_ERROR_DB description')
+
 
 class AuthException(Exception):
     __version__ = 1
@@ -91,6 +99,20 @@ class UserDeviceException(AuthException):
 
 
 class UserDeviceNotFoundException(AuthException):
+    __version__ = 1
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class UserVPNServerConfigException(AuthException):
+    __version__ = 1
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class UserVPNServerConfigNotFoundException(AuthException):
     __version__ = 1
 
     def __init__(self, *args, **kwargs):

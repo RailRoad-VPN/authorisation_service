@@ -49,3 +49,14 @@ CREATE TABLE public.user_device
   , modify_reason TEXT NOT NULL DEFAULT 'init'
   , created_date TIMESTAMP DEFAULT NOW() NOT NULL
 );
+
+CREATE TABLE public.user_vpn_server_config
+(
+    uuid UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL
+  , user_uuid UUID NOT NULL
+  , configuration TEXT NOT NULL
+  , version INT DEFAULT 1 NOT NULL
+  , vpn_device_platform_id INT NOT NULL
+  , vpn_type_id INT NOT NULL
+  , created_date TIMESTAMP NOT NULL DEFAULT now()
+);

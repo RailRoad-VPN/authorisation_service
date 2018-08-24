@@ -9,6 +9,7 @@ from flask import Flask, request
 from app.exception import AuthError
 from app.resources.users import UsersAPI
 from app.resources.users.devices import UsersDevicesAPI
+from users.vpn_server_configurations import UsersVPNServersConfigurationsAPI
 
 sys.path.insert(0, '../psql_library')
 from psql_helper import PostgreSQL
@@ -45,6 +46,7 @@ db_storage_service = DBStorageService(psql=psql)
 apis = [
     {'cls': UsersAPI, 'args': [db_storage_service, app_config]},
     {'cls': UsersDevicesAPI, 'args': [db_storage_service, app_config]},
+    {'cls': UsersVPNServersConfigurationsAPI, 'args': [db_storage_service, app_config]},
 ]
 
 register_api(app, api_base_uri, apis)
