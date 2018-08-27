@@ -214,7 +214,7 @@ class UsersVPNServersConfigurationsAPI(ResourceAPI):
         else:
             # all user configurations
             try:
-                user_vpn_server_config_list = vpnserverconfig_db.find()
+                user_vpn_server_config_list = vpnserverconfig_db.find_user()
                 user_vpn_server_config_list_dict = [user_vpn_server_config_list[i].to_api_dict() for i in
                                                     range(0, len(user_vpn_server_config_list))]
                 response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK,

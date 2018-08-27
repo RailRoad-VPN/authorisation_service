@@ -74,8 +74,8 @@ class UserVPNServerConfigurationDB(UserVPNServerConfigurationStored):
     def __init__(self, storage_service: StorageService, **kwargs):
         super().__init__(storage_service, **kwargs)
 
-    def find(self):
-        self.logger.info('UserVPNServerConfigurationDB find method')
+    def find_user(self):
+        self.logger.info('UserVPNServerConfigurationDB find_user method')
         select_sql = '''
                       SELECT 
                         uuid,
@@ -86,14 +86,16 @@ class UserVPNServerConfigurationDB(UserVPNServerConfigurationStored):
                         version,
                         to_json(created_date) AS created_date 
                       FROM public.user_vpn_server_config
+                      WHERE user_uuid = ?
                       '''
         if self._limit:
             select_sql += f"\nLIMIT {self._limit}\nOFFSET {self._offset}"
         self.logger.debug(f"Select SQL: {select_sql}")
+        params = (self._user_uuid,)
 
         try:
             self.logger.debug('Call database service')
-            vpnserverconfig_list_db = self._storage_service.get(sql=select_sql)
+            vpnserverconfig_list_db = self._storage_service.get(sql=select_sql, data=params)
         except DatabaseError as e:
             logging.error(e)
             error_message = AuthError.USER_VPNSERVERCONFIG_FIND_ERROR_DB.message
