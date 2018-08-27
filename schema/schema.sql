@@ -14,6 +14,7 @@ SET default_with_oids = FALSE;
 
 DROP TABLE IF EXISTS public.user CASCADE;
 DROP TABLE IF EXISTS public.user_device CASCADE;
+DROP TABLE IF EXISTS public.user_vpn_server_config CASCADE;
 
 CREATE TABLE public.user
 (
@@ -59,4 +60,5 @@ CREATE TABLE public.user_vpn_server_config
   , vpn_device_platform_id INT NOT NULL
   , vpn_type_id INT NOT NULL
   , created_date TIMESTAMP NOT NULL DEFAULT now()
+  , CONSTRAINT uniq_config UNIQUE (user_uuid, vpn_device_platform_id, vpn_type_id)
 );
