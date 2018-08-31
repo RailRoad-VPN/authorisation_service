@@ -224,7 +224,7 @@ class UserDeviceDB(UserDeviceStored):
             self._suuid,
         )
         try:
-            self.logger.debug("Call database service")
+            self.logger.debug(f"{self.__class__}: Call database service")
             self._storage_service.update(update_sql, params)
         except DatabaseError as e:
             self._storage_service.rollback()
@@ -251,7 +251,7 @@ class UserDeviceDB(UserDeviceStored):
 
         params = (self._suuid,)
         try:
-            self.logger.debug("Call database service")
+            self.logger.debug(f"{self.__class__}: Call database service")
             self._storage_service.delete(sql=delete_sql, data=params)
         except DatabaseError as e:
             self._storage_service.rollback()

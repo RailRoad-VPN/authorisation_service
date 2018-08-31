@@ -217,7 +217,7 @@ class UserDB(UserStored):
         )
 
         try:
-            self.logger.debug("Call database service")
+            self.logger.debug(f"{self.__class__}: Call database service")
             self._storage_service.update(update_sql, params)
         except DatabaseError as e:
             self._storage_service.rollback()
