@@ -90,7 +90,7 @@ class UserVPNServerConfigurationDB(UserVPNServerConfigurationStored):
                       '''
         if self._limit:
             select_sql += f"\nLIMIT {self._limit}\nOFFSET {self._offset}"
-        self.logger.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"{self.__class__}: Select SQL: {select_sql}")
         params = (self._user_uuid,)
 
         try:
@@ -127,7 +127,7 @@ class UserVPNServerConfigurationDB(UserVPNServerConfigurationStored):
                       FROM public.user_vpn_server_config
                       WHERE uuid = ?
                       '''
-        self.logger.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"{self.__class__}: Select SQL: {select_sql}")
         params = (self._suuid,)
 
         try:
@@ -177,7 +177,7 @@ class UserVPNServerConfigurationDB(UserVPNServerConfigurationStored):
                       FROM public.user_vpn_server_config
                       WHERE user_uuid = ? AND vpn_device_platform_id = ? AND vpn_type_id = ?
                       '''
-        self.logger.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"{self.__class__}: Select SQL: {select_sql}")
         params = (
             self._user_uuid,
             self._vpn_device_platform_id,

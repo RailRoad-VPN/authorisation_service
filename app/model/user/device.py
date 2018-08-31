@@ -290,7 +290,7 @@ class UserDeviceDB(UserDeviceStored):
                         WHERE 
                             uuid = ?
                     '''
-        self.logger.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"{self.__class__}: Select SQL: {select_sql}")
         params = (self._suuid,)
 
         try:
@@ -345,7 +345,7 @@ class UserDeviceDB(UserDeviceStored):
                         WHERE 
                             device_token = ?
                     '''
-        self.logger.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"{self.__class__}: Select SQL: {select_sql}")
         params = (self._device_token,)
 
         try:
@@ -401,7 +401,7 @@ class UserDeviceDB(UserDeviceStored):
                         WHERE 
                             user_uuid = ?
                     '''
-        self.logger.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"{self.__class__}: Select SQL: {select_sql}")
         params = (self._user_uuid,)
 
         try:
@@ -447,7 +447,7 @@ class UserDeviceDB(UserDeviceStored):
                     '''
         if self._limit:
             select_sql += "LIMIT %s\nOFFSET %s" % (self._limit, self._offset)
-        self.logger.debug(f"Select SQL: {select_sql}")
+        self.logger.debug(f"{self.__class__}: Select SQL: {select_sql}")
 
         try:
             self.logger.debug('Call database service')
