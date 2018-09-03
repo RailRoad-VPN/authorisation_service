@@ -39,7 +39,7 @@ CREATE TABLE public.user_device
   , user_uuid UUID REFERENCES public.user(uuid) NOT NULL
   , device_token VARCHAR(256) UNIQUE
   , device_id VARCHAR(500)
-  , virtual_ip INET NOT NULL
+  , virtual_ip INET
   , device_ip INET
   , platform_id INT NOT NULL
   , vpn_type_id INT NOT NULL

@@ -68,8 +68,7 @@ class UsersDevicesAPI(ResourceAPI):
             'device_id': device_id,
             'platform_id': platform_id,
             'vpn_type_id': vpn_type_id,
-            'is_active': is_active,
-            'virtual_ip': virtual_ip
+            'is_active': is_active
         }
 
         error_fields = check_required_api_fields(req_fields)
