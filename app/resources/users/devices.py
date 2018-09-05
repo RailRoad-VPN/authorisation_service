@@ -123,7 +123,7 @@ class UsersDevicesAPI(ResourceAPI):
         platform_id = request_json.get(UserDeviceDB._platform_id_field, None)
         vpn_type_id = request_json.get(UserDeviceDB._vpn_type_id_field, None)
         location = request_json.get(UserDeviceDB._location_field, None)
-        is_active = request_json.get(UserDeviceDB._is_active_field, False)
+        is_active = request_json.get(UserDeviceDB._is_active_field, None)
         connected_since = request_json.get(UserDeviceDB._connected_since_field, None)
         virtual_ip = request_json.get(UserDeviceDB._virtual_ip_field, None)
         device_ip = request_json.get(UserDeviceDB._device_ip_field, None)
