@@ -63,10 +63,10 @@ class UserDevice(object):
             'vpn_type_id': self._vpn_type_id,
             'location': self._location,
             'is_active': self._is_active,
-            'connected_since': str(self._connected_since),
+            'connected_since': self._connected_since,
             'modify_reason': self._modify_reason,
-            'modify_date': str(self._modify_date),
-            'created_date': str(self._created_date),
+            'modify_date': self._modify_date,
+            'created_date': self._created_date,
         }
 
     def to_api_dict(self):
@@ -81,10 +81,10 @@ class UserDevice(object):
             'vpn_type_id': self._vpn_type_id,
             'location': self._location,
             'is_active': self._is_active,
-            'connected_since': str(self._connected_since),
+            'connected_since': self._connected_since,
             'modify_reason': self._modify_reason,
-            'modify_date': str(self._modify_date),
-            'created_date': str(self._created_date),
+            'modify_date': self._modify_date,
+            'created_date': self._created_date,
         }
 
 

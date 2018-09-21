@@ -135,7 +135,6 @@ class UsersDevicesAPI(ResourceAPI):
             'platform_id': platform_id,
             'vpn_type_id': vpn_type_id,
             'is_active': is_active,
-            'connected_since': connected_since,
             'virtual_ip': virtual_ip,
             'modify_reason': modify_reason,
         }
