@@ -192,13 +192,9 @@ class UserDeviceDB(UserDeviceStored):
                     UPDATE 
                       public.user_device 
                     SET 
-                      user_uuid = ?,
-                      device_token = ?,
                       device_id = ?,
                       virtual_ip = ?,
                       device_ip = ?,
-                      platform_id = ?,
-                      vpn_type_id = ?,
                       location = ?,
                       is_active = ?,
                       connected_since = ?,
@@ -210,13 +206,9 @@ class UserDeviceDB(UserDeviceStored):
         self.logger.debug('Update SQL: %s' % update_sql)
 
         params = (
-            self._user_uuid,
-            self._device_token,
             self._device_id,
             self._virtual_ip,
             self._device_ip,
-            self._platform_id,
-            self._vpn_type_id,
             self._location,
             self._is_active,
             self._connected_since,

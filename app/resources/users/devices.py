@@ -51,16 +51,14 @@ class UsersDevicesAPI(ResourceAPI):
         if request_json is None:
             return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.REQUEST_NO_JSON)
 
-        user_uuid = request_json.get(UserDeviceDB._user_uuid_field, None)
         device_id = request_json.get(UserDeviceDB._device_id_field, None)
-        device_token = request_json.get(UserDeviceDB._device_token_field, None)
         platform_id = request_json.get(UserDeviceDB._platform_id_field, None)
         vpn_type_id = request_json.get(UserDeviceDB._vpn_type_id_field, None)
         location = request_json.get(UserDeviceDB._location_field, None)
         is_active = request_json.get(UserDeviceDB._is_active_field, True)
-        connected_since = request_json.get(UserDeviceDB._connected_since_field, None)
         virtual_ip = request_json.get(UserDeviceDB._virtual_ip_field, None)
         device_ip = request_json.get(UserDeviceDB._device_ip_field, None)
+        connected_since = request_json.get(UserDeviceDB._connected_since_field, None)
 
         req_fields = {
             'user_uuid': user_uuid,
@@ -77,8 +75,7 @@ class UsersDevicesAPI(ResourceAPI):
             resp = make_api_response(data=response_data, http_code=response_data.code)
             return resp
 
-        if device_token is None:
-            device_token = uuid.uuid4().hex
+        device_token = uuid.uuid4().hex
 
         user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, user_uuid=user_uuid,
                                       device_id=device_id, device_token=device_token, location=location,
@@ -106,7 +103,7 @@ class UsersDevicesAPI(ResourceAPI):
     def put(self, user_uuid: str, suuid: str) -> Response:
         request_json = request.json
 
-        suuid_b = request_json.get(UserDeviceDB._user_uuid_field, None)
+        suuid_b = request_json.get(UserDeviceDB._suuid_field, None)
         user_uuid_b = request_json.get(UserDeviceDB._user_uuid_field, None)
 
         is_valid_uuid = check_uuid(suuid=suuid)
@@ -117,25 +114,19 @@ class UsersDevicesAPI(ResourceAPI):
                 or user_uuid != user_uuid_b:
             return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.USER_DEVICE_FINDBYUUID_ERROR)
 
-        device_token = request_json.get(UserDeviceDB._device_token_field, None)
         device_id = request_json.get(UserDeviceDB._device_id_field, None)
-        platform_id = request_json.get(UserDeviceDB._platform_id_field, None)
-        vpn_type_id = request_json.get(UserDeviceDB._vpn_type_id_field, None)
+        device_ip = request_json.get(UserDeviceDB._device_ip_field, None)
+        virtual_ip = request_json.get(UserDeviceDB._virtual_ip_field, None)
         location = request_json.get(UserDeviceDB._location_field, None)
         is_active = request_json.get(UserDeviceDB._is_active_field, None)
         connected_since = request_json.get(UserDeviceDB._connected_since_field, None)
-        virtual_ip = request_json.get(UserDeviceDB._virtual_ip_field, None)
-        device_ip = request_json.get(UserDeviceDB._device_ip_field, None)
         modify_reason = request_json.get(UserDeviceDB._modify_reason_field, None)
 
         req_fields = {
-            'user_uuid': user_uuid,
-            'device_token': device_token,
             'device_id': device_id,
-            'platform_id': platform_id,
-            'vpn_type_id': vpn_type_id,
-            'is_active': is_active,
             'virtual_ip': virtual_ip,
+            'location': location,
+            'is_active': is_active,
             'modify_reason': modify_reason,
         }
 
@@ -147,8 +138,7 @@ class UsersDevicesAPI(ResourceAPI):
             return resp
 
         user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, suuid=suuid, user_uuid=user_uuid,
-                                      device_token=device_token, device_id=device_id, location=location,
-                                      platform_id=platform_id, vpn_type_id=vpn_type_id, is_active=is_active,
+                                      device_id=device_id, location=location, is_active=is_active,
                                       virtual_ip=virtual_ip, device_ip=device_ip, connected_since=connected_since,
                                       modify_reason=modify_reason)
         try:
@@ -168,7 +158,6 @@ class UsersDevicesAPI(ResourceAPI):
         resp = make_api_response(http_code=HTTPStatus.OK, data=response_data)
         api_url = self.__api_url__.replace('<string:user_uuid>', user_uuid)
         resp.headers['Location'] = '%s/%s/%s' % (self._config['API_BASE_URI'], api_url, suuid)
-        resp.headers['X-Device-Token'] = device_token
         return resp
 
     def get(self, user_uuid: str, suuid: str = None) -> Response:
