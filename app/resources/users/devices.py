@@ -167,8 +167,8 @@ class UsersDevicesAPI(ResourceAPI):
         if not is_valid:
             return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.USER_DEVICE_FINDBYUUID_ERROR)
 
-        user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, suuid=suuid, user_uuid=user_uuid, device_id=suuid,
-                                      limit=self.pagination.limit, offset=self.pagination.offset)
+        user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, suuid=suuid,  device_id=suuid,
+                                      user_uuid=user_uuid, limit=self.pagination.limit, offset=self.pagination.offset)
         if suuid is None:
             # find all user devices is no parameter set
             try:
