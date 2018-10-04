@@ -36,7 +36,7 @@ class UsersDevicesAPI(ResourceAPI):
     def get_api_urls(base_url: str) -> List[APIResourceURL]:
         url = "%s/%s" % (base_url, UsersDevicesAPI.__api_url__)
         api_urls = [
-            APIResourceURL(base_url=url, resource_name='', methods=['GET', 'POST', 'PUT']),
+            APIResourceURL(base_url=url, resource_name='', methods=['GET', 'POST']),
             APIResourceURL(base_url=url, resource_name='<string:suuid>', methods=['GET', 'PUT', 'DELETE']),
         ]
         return api_urls
@@ -190,12 +190,16 @@ class UsersDevicesAPI(ResourceAPI):
                 resp = make_api_response(data=response_data, http_code=http_code)
                 return resp
         elif suuid is not None:
+            device_id = None
             is_valid = check_uuid(suuid=suuid)
             if not is_valid:
-                return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.USER_DEVICE_FINDBYUUID_ERROR)
+                device_id = suuid
             # find user device by suuid
             try:
-                user_device = user_device_db.find_by_suuid()
+                if device_id is not None:
+                    user_device = user_device_db.find_by_device_id()
+                else:
+                    user_device = user_device_db.find_by_suuid()
                 response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.OK,
                                             data=user_device.to_api_dict())
                 resp = make_api_response(data=response_data, http_code=HTTPStatus.OK)

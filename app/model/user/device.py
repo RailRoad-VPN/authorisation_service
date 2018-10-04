@@ -370,6 +370,62 @@ class UserDeviceDB(UserDeviceStored):
 
         return self.__map_user_devicedb_to_user_device(user_device_db=user_device_db)
 
+    def find_by_device_id(self) -> Optional[UserDevice]:
+        self.logger.info('Find UserDevice by find_by_device_id')
+        select_sql = '''
+                        SELECT 
+                            uuid,
+                            user_uuid,
+                            device_token,
+                            device_id,
+                            virtual_ip,
+                            device_ip,
+                            platform_id,
+                            vpn_type_id,
+                            location,
+                            is_active,
+                            to_json(connected_since)  AS connected_since,
+                            modify_reason,
+                            to_json(modify_date) AS modify_date,
+                            to_json(created_date) AS created_date
+                        FROM 
+                            public.user_device 
+                        WHERE 
+                            device_id = ?
+                    '''
+        self.logger.debug(f"{self.__class__}: Select SQL: {select_sql}")
+        params = (self._device_id,)
+
+        try:
+            self.logger.debug('Call database service')
+            user_device_list_db = self._storage_service.get(select_sql, params)
+        except DatabaseError as e:
+            self.logger.error(e)
+            error_message = AuthError.USER_DEVICE_FINDBYDEVICEID_ERROR_DB.message
+            error_code = AuthError.USER_DEVICE_FINDBYDEVICEID_ERROR_DB.code
+            developer_message = "%s. DatabaseError.. " \
+                                "Code: %s . %s" % (
+                                    AuthError.USER_DEVICE_FINDBYDEVICEID_ERROR_DB.developer_message, e.pgcode,
+                                    e.pgerror)
+            raise UserDeviceException(error=error_message, error_code=error_code, developer_message=developer_message)
+
+        if len(user_device_list_db) == 1:
+            user_device_db = user_device_list_db[0]
+        elif len(user_device_list_db) == 0:
+            error_message = AuthError.USER_DEVICE_FINDBYDEVICEID_ERROR.message
+            error_code = AuthError.USER_DEVICE_FINDBYDEVICEID_ERROR.code
+            developer_message = AuthError.USER_DEVICE_FINDBYDEVICEID_ERROR.developer_message
+            raise UserDeviceNotFoundException(error=error_message, error_code=error_code,
+                                              developer_message=developer_message)
+        else:
+            error_message = AuthError.USER_DEVICE_FINDBYDEVICEID_ERROR.message
+            developer_message = "%s. Find by specified email return more than 1 object. This is CAN NOT be! Something " \
+                                "really bad with database." % AuthError.USER_DEVICE_FINDBYDEVICEID_ERROR.developer_message
+            error_code = AuthError.USER_DEVICE_FINDBYDEVICEID_ERROR.code
+            raise UserDeviceException(error=error_message, error_code=error_code, developer_message=developer_message)
+
+        return self.__map_user_devicedb_to_user_device(user_device_db=user_device_db)
+
     def find_by_user_uuid(self) -> List[UserDevice]:
         self.logger.info('Find UserDevice by device_token')
         select_sql = '''
