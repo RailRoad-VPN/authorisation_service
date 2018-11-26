@@ -120,7 +120,6 @@ class UsersAPI(ResourceAPI):
 
         req_fields = {
             'email': email,
-            'password': password,
             'is_expired': is_expired,
             'is_locked': is_locked,
             'is_password_expired': is_password_expired,
