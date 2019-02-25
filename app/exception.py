@@ -28,6 +28,7 @@ class AuthError(APIErrorEnum):
 
     UNKNOWN_ERROR_CODE = (name + str(count()), 'UNKNOWN_ERROR_CODE phrase', 'UNKNOWN_ERROR_CODE description')
     REQUEST_NO_JSON = (name + str(count()), 'REQUEST_NO_JSON phrase', 'REQUEST_NO_JSON description')
+    BAD_USER_IDENTITY = (name + str(count()), 'BAD_USER_IDENTITY phrase', 'BAD_USER_IDENTITY description')
 
     USER_CREATE_EMAIL_EXIST_ERROR = (name + str(count()), 'USER_CREATE_EMAIL_EXIST_ERROR phrase', 'USER_CREATE_EMAIL_EXIST_ERROR description')
     USER_UPDATE_ERROR_DB = (name + str(count()), 'USER_UPDATE_ERROR_DB phrase', 'USER_UPDATE_ERROR_DB description')
@@ -55,6 +56,13 @@ class AuthError(APIErrorEnum):
     USER_DEVICE_FINDALL_ERROR_DB = (name + str(count()), 'USER_DEVICE_FINDALL_ERROR_DB phrase', 'USER_DEVICE_FINDALL_ERROR_DB description')
     USER_DEVICE_UPDATE_BYPINCODE_ERROR_DB = (name + str(count()), 'USER_DEVICE_UPDATE_BYPINCODE_ERROR_DB phrase', 'USER_DEVICE_UPDATE_BYPINCODE_ERROR_DB description')
     USER_DEVICE_DELETE_ERROR_DB = (name + str(count()), 'USER_DEVICE_DELETE_ERROR_DB phrase', 'USER_DEVICE_DELETE_ERROR_DB description')
+
+    USER_TICKET_BAD_ZIP = (name + str(count()), 'USER_TICKET_CREATE_ERROR_DB phrase', 'USER_TICKET_CREATE_ERROR_DBdescription')
+    USER_TICKET_CREATE_ERROR_DB = (name + str(count()), 'USER_TICKET_CREATE_ERROR_DB phrase', 'USER_TICKET_CREATE_ERROR_DBdescription')
+    USER_TICKET_UPDATE_ERROR_DB = (name + str(count()), 'USER_TICKET_UPDATE_ERROR_DB phrase', 'USER_TICKET_UPDATE_ERROR_DBdescription')
+    USER_TICKET_FINDBYUUID_ERROR_DB = (name + str(count()), 'USER_TICKET_FINDBYUUID_ERROR_DB phrase', 'USER_TICKET_FINDBYUUID_ERROR_DBdescription')
+    USER_TICKET_FINDBYUUID_ERROR = (name + str(count()), 'USER_TICKET_FINDBYUUID_ERROR phrase', 'USER_TICKET_FINDBYUUID_ERRORdescription')
+    USER_TICKET_FINDBYTICKETNUMBER_ERROR = (name + str(count()), 'USER_TICKET_FINDBYTICKETNUMBER_ERROR phrase', 'USER_TICKET_FINDBYTICKETNUMBER_ERROR description')
 
     USER_VPNSERVERCONFIG_FIND_ERROR_DB = (name + str(count()), 'USER_VPNSERVERCONFIG_FIND_ERROR_DB phrase', 'USER_VPNSERVERCONFIG_FIND_ERROR_DB description')
     USER_VPNSERVERCONFIG_FIND_BY_UUID_ERROR_DB = (name + str(count()), 'USER_VPNSERVERCONFIG_FIND_BY_UUID_ERROR_DB phrase', 'USER_VPNSERVERCONFIG_FIND_BY_UUID_ERROR_DB description')
@@ -101,6 +109,20 @@ class UserDeviceException(AuthException):
 
 
 class UserDeviceNotFoundException(AuthException):
+    __version__ = 1
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class UserTicketException(AuthException):
+    __version__ = 1
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class UserTicketNotFoundException(AuthException):
     __version__ = 1
 
     def __init__(self, *args, **kwargs):

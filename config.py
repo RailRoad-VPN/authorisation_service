@@ -28,6 +28,8 @@ class DevelopmentConfig(Config):
     PSQL_PASSWORD = 'railroadman'
     PSQL_HOST = '127.0.0.1'
 
+    USER_TICKET_ZIP_DIR = '/Users/dikkini/Downloads'
+
 
 class TestingConfig(Config):
     ENV = 'testing'
@@ -38,3 +40,5 @@ class TestingConfig(Config):
     PSQL_USER = 'railroadman'
     PSQL_PASSWORD = 'railroadman'
     PSQL_HOST = '127.0.0.1'
+
+    USER_TICKET_ZIP_DIR = '/opt/apps/dfn/tickets'

@@ -51,6 +51,26 @@ CREATE TABLE public.user_device
   , created_date TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+CREATE TABLE public.ticket_status
+(
+    id SERIAL PRIMARY KEY
+  , name VARCHAR(100)
+);
+
+CREATE TABLE public.user_ticket
+(
+    uuid UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL
+  , number SERIAL UNIQUE
+  , status_id INT REFERENCES public.ticket_status(id)
+  , user_uuid UUID REFERENCES public.user(uuid) NOT NULL
+  , contact_email VARCHAR(256)
+  , description TEXT
+  , zip_path VARCHAR(1000)
+  , modify_date TIMESTAMP NOT NULL DEFAULT now()
+  , modify_reason TEXT NOT NULL DEFAULT 'init'
+  , created_date TIMESTAMP DEFAULT NOW() NOT NULL
+);
+
 CREATE TABLE public.user_vpn_server_config
 (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL
