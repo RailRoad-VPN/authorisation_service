@@ -118,7 +118,7 @@ class UsersTicketsAPI(ResourceAPI):
                                       description=description, zip_path=zip_path)
         try:
             self.logger.debug("create user ticket")
-            suuid = user_ticket_db.create()
+            number = user_ticket_db.create()
         except UserTicketException as e:
             self.logger.error(e)
             error_code = e.error_code
@@ -132,7 +132,7 @@ class UsersTicketsAPI(ResourceAPI):
         response_data = APIResponse(status=APIResponseStatus.success.status, code=HTTPStatus.CREATED)
         resp = make_api_response(data=response_data, http_code=HTTPStatus.CREATED)
         api_url = self.__api_url__.replace('<string:user_uuid>', user_uuid)
-        resp.headers['Location'] = f"{self._config['API_BASE_URI']}/{api_url}/{suuid}"
+        resp.headers['Location'] = f"{self._config['API_BASE_URI']}/{api_url}/{number}"
         return resp
 
     def put(self, user_uuid: str, suuid: str) -> Response:

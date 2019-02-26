@@ -115,6 +115,7 @@ class UserTicketDB(UserTicketStored):
                             ) 
                           VALUES 
                             (?, ?, ?, ?, ?, ?, ?)
+                          RETURNING number;
         '''
         create_user_ticket_params = (
             self._suuid,
@@ -129,7 +130,7 @@ class UserTicketDB(UserTicketStored):
 
         try:
             self.logger.debug('Call database service')
-            self._storage_service.create(sql=create_user_ticket_sql, data=create_user_ticket_params)
+            self._number = self._storage_service.create(sql=create_user_ticket_sql, data=create_user_ticket_params, is_return=True)
         except DatabaseError as e:
             self._storage_service.rollback()
             self.logger.error(e)
