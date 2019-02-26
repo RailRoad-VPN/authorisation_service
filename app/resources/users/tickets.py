@@ -1,3 +1,4 @@
+import base64
 import datetime
 import logging
 import os
@@ -99,8 +100,10 @@ class UsersTicketsAPI(ResourceAPI):
 
             self.logger.debug("write zip to FS")
             try:
+                self.logger.debug("base64 decode zipfile")
+                zip_file_bytes = base64.b64decode(zipfile)
                 with open(zip_path, 'wb') as w:
-                    w.write(zipfile)
+                    w.write(zip_file_bytes)
             except TypeError:
                 self.logger.debug("TypeError when write zipfile")
                 error_code = AuthError.USER_TICKET_BAD_ZIP.code
