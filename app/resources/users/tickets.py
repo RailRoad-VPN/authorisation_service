@@ -102,6 +102,7 @@ class UsersTicketsAPI(ResourceAPI):
                 with open(zip_path, 'wb') as w:
                     w.write(zipfile)
             except TypeError:
+                self.logger.debug("TypeError when write zipfile")
                 error_code = AuthError.USER_TICKET_BAD_ZIP.code
                 error = AuthError.USER_TICKET_BAD_ZIP.message
                 developer_message = AuthError.USER_TICKET_BAD_ZIP.developer_message

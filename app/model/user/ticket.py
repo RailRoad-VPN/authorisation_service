@@ -130,7 +130,8 @@ class UserTicketDB(UserTicketStored):
 
         try:
             self.logger.debug('Call database service')
-            self._number = self._storage_service.create(sql=create_user_ticket_sql, data=create_user_ticket_params, is_return=True)
+            self._number = self._storage_service.create(sql=create_user_ticket_sql, data=create_user_ticket_params,
+                                                        is_return=True)[0][self._number_field]
         except DatabaseError as e:
             self._storage_service.rollback()
             self.logger.error(e)
