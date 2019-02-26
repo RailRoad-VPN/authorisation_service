@@ -24,12 +24,14 @@ class UserTicket(object):
     _description = None
     _zip_path = None
     _status_id = None
+    _extra_info = None
     _modify_reason = None
     _modify_date = None
     _created_date = None
 
-    def __init__(self, suuid: str = None, number: int = None, user_uuid: str = None, contact_email: str = None, description: str = None,
-                 zip_path: str = None, status_id: int = None, modify_reason: str = None, modify_date: datetime = None,
+    def __init__(self, suuid: str = None, number: int = None, user_uuid: str = None, contact_email: str = None,
+                 description: str = None, zip_path: str = None, status_id: int = None, extra_info: dict = None,
+                 modify_reason: str = None, modify_date: datetime = None,
                  created_date: datetime = None):
         self._suuid = suuid
         self._number = number
@@ -38,6 +40,7 @@ class UserTicket(object):
         self._description = description
         self._zip_path = zip_path
         self._status_id = status_id
+        self._extra_info = extra_info
         self._modify_reason = modify_reason
         self._modify_date = modify_date
         self._created_date = created_date
@@ -51,6 +54,7 @@ class UserTicket(object):
             'description': self._description,
             'zip_path': self._zip_path,
             'status_id': self._status_id,
+            'extra_info': self._extra_info,
             'modify_reason': self._modify_reason,
             'modify_date': self._modify_date,
             'created_date': self._created_date,
@@ -67,11 +71,11 @@ class UserTicketStored(StoredObject, UserTicket):
 
     def __init__(self, storage_service: StorageService, suuid: str = None, number: int = None, user_uuid: str = None,
                  contact_email: str = None, description: str = None, zip_path: str = None, status_id: int = None,
-                 modify_reason: str = None, created_date: datetime = None, limit: int = None, offset: int = None,
-                 **kwargs):
+                 extra_info: dict = None, modify_reason: str = None, created_date: datetime = None, limit: int = None,
+                 offset: int = None, **kwargs):
         StoredObject.__init__(self, storage_service=storage_service, limit=limit, offset=offset)
         UserTicket.__init__(self, suuid=suuid, number=number, user_uuid=user_uuid, contact_email=contact_email,
-                            description=description, zip_path=zip_path, status_id=status_id,
+                            description=description, zip_path=zip_path, status_id=status_id, extra_info=extra_info,
                             modify_reason=modify_reason, created_date=created_date)
 
 
@@ -87,6 +91,7 @@ class UserTicketDB(UserTicketStored):
     _description_field = 'description'
     _zip_path_field = 'zip_path'
     _status_id_field = 'status_id'
+    _extra_info_field = 'extra_info'
     _modify_reason_field = 'modify_reason'
     _modify_date_field = 'modify_date'
     _created_date_field = 'created_date'
@@ -105,10 +110,11 @@ class UserTicketDB(UserTicketStored):
                                 contact_email,
                                 description,
                                 zip_path,
-                                status_id
+                                status_id,
+                                extra_info
                             ) 
                           VALUES 
-                            (?, ?, ?, ?, ?, ?)
+                            (?, ?, ?, ?, ?, ?, ?)
         '''
         create_user_ticket_params = (
             self._suuid,
@@ -117,6 +123,7 @@ class UserTicketDB(UserTicketStored):
             self._description,
             self._zip_path,
             self._status_id,
+            self._extra_info,
         )
         self.logger.debug('Create UserTicket SQL : %s' % create_user_ticket_sql)
 
@@ -139,7 +146,7 @@ class UserTicketDB(UserTicketStored):
             raise UserTicketException(error=error_message, error_code=error_code, developer_message=developer_message)
         self.logger.debug('UserTicket created.')
 
-        return str(self._suuid)
+        return str(self._number)
 
     def update(self):
         self.logger.info('Update UserTicket')
@@ -224,6 +231,7 @@ class UserTicketDB(UserTicketStored):
                             description,
                             zip_path,
                             status_id,
+                            extra_info,
                             modify_reason,
                             to_json(modify_date) AS modify_date,
                             to_json(created_date) AS created_date
@@ -275,6 +283,7 @@ class UserTicketDB(UserTicketStored):
                             description,
                             zip_path,
                             status_id,
+                            extra_info,
                             modify_reason,
                             to_json(modify_date) AS modify_date,
                             to_json(created_date) AS created_date
@@ -327,6 +336,7 @@ class UserTicketDB(UserTicketStored):
                             description,
                             zip_path,
                             status_id,
+                            extra_info,
                             modify_reason,
                             to_json(modify_date) AS modify_date,
                             to_json(created_date) AS created_date
@@ -366,6 +376,7 @@ class UserTicketDB(UserTicketStored):
                           description=user_ticket_db[self._description_field],
                           zip_path=user_ticket_db[self._zip_path_field],
                           status_id=user_ticket_db[self._status_id_field],
+                          extra_info=user_ticket_db[self._extra_info_field],
                           modify_reason=user_ticket_db[self._modify_reason_field],
                           modify_date=user_ticket_db[self._modify_date_field],
                           created_date=user_ticket_db[self._created_date_field])

@@ -61,6 +61,7 @@ class UsersTicketsAPI(ResourceAPI):
         contact_email = request_json.get(UserTicketDB._contact_email_field, None)
         description = request_json.get(UserTicketDB._description_field, None)
         status_id = request_json.get(UserTicketDB._status_id_field, None)
+        extra_info = request_json.get(UserTicketDB._extra_info_field, None)
         zipfile = request_json.get('zipfile', None)
 
         req_fields = {
@@ -109,10 +110,12 @@ class UsersTicketsAPI(ResourceAPI):
                                             developer_message=developer_message, error_code=error_code)
                 return make_api_response(data=response_data, http_code=http_code)
 
+        if user_uuid == "anonymous":
+            user_uuid = None
         self.logger.debug("create userticketdb object")
         user_ticket_db = UserTicketDB(storage_service=self.__db_storage_service, user_uuid=user_uuid,
-                                      status_id=status_id, contact_email=contact_email, description=description,
-                                      zip_path=zip_path)
+                                      extra_info=extra_info, status_id=status_id, contact_email=contact_email,
+                                      description=description, zip_path=zip_path)
         try:
             self.logger.debug("create user ticket")
             suuid = user_ticket_db.create()
