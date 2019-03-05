@@ -116,16 +116,12 @@ class UsersDevicesAPI(ResourceAPI):
 
         device_id = request_json.get(UserDeviceDB._device_id_field, None)
         device_ip = request_json.get(UserDeviceDB._device_ip_field, None)
-        virtual_ip = request_json.get(UserDeviceDB._virtual_ip_field, None)
         location = request_json.get(UserDeviceDB._location_field, None)
         is_active = request_json.get(UserDeviceDB._is_active_field, None)
-        connected_since = request_json.get(UserDeviceDB._connected_since_field, None)
         modify_reason = request_json.get(UserDeviceDB._modify_reason_field, None)
 
         req_fields = {
             'device_id': device_id,
-            'virtual_ip': virtual_ip,
-            'location': location,
             'is_active': is_active,
             'modify_reason': modify_reason,
         }
@@ -139,10 +135,13 @@ class UsersDevicesAPI(ResourceAPI):
 
         user_device_db = UserDeviceDB(storage_service=self.__db_storage_service, suuid=suuid, user_uuid=user_uuid,
                                       device_id=device_id, location=location, is_active=is_active,
-                                      virtual_ip=virtual_ip, device_ip=device_ip, connected_since=connected_since,
+                                      device_ip=device_ip,
                                       modify_reason=modify_reason)
         try:
-            user_device_db.update()
+            if device_id is not None and device_ip is not None and location is not None:
+                user_device_db.update()
+            else:
+                user_device_db.update_active()
         except UserDeviceException as e:
             self.logger.error(e)
             http_code = HTTPStatus.BAD_REQUEST
