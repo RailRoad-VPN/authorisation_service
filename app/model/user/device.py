@@ -21,7 +21,6 @@ class UserDevice(object):
     _user_uuid = None
     _device_token = None
     _device_id = None
-    _device_ip = None
     _platform_id = None
     _vpn_type_id = None
     _location = None
@@ -31,14 +30,13 @@ class UserDevice(object):
     _created_date = None
 
     def __init__(self, suuid: str = None, user_uuid: str = None, device_token: str = None,
-                 device_ip: str = None, device_id: str = None, platform_id: int = None, vpn_type_id: int = None,
+                 device_id: str = None, platform_id: int = None, vpn_type_id: int = None,
                  location: str = None, is_active: bool = None,
                  modify_reason: str = None, modify_date: datetime = None, created_date: datetime = None):
         self._suuid = suuid
         self._user_uuid = user_uuid
         self._device_token = device_token
         self._device_id = device_id
-        self._device_ip = device_ip
         self._platform_id = platform_id
         self._vpn_type_id = vpn_type_id
         self._location = location
@@ -53,7 +51,6 @@ class UserDevice(object):
             'user_uuid': str(self._user_uuid),
             'device_token': self._device_token,
             'device_id': self._device_id,
-            'device_ip': self._device_ip,
             'platform_id': self._platform_id,
             'vpn_type_id': self._vpn_type_id,
             'location': self._location,
@@ -69,7 +66,6 @@ class UserDevice(object):
             'user_uuid': str(self._user_uuid),
             'device_token': self._device_token,
             'device_id': self._device_id,
-            'device_ip': self._device_ip,
             'platform_id': self._platform_id,
             'vpn_type_id': self._vpn_type_id,
             'location': self._location,
@@ -86,13 +82,12 @@ class UserDeviceStored(StoredObject, UserDevice):
     logger = logging.getLogger(__name__)
 
     def __init__(self, storage_service: StorageService, suuid: str = None, user_uuid: str = None,
-                 device_token: str = None, device_id: str = None, device_ip: str = None,
-                 platform_id: str = None, vpn_type_id: int = None, location: str = None, is_active: bool = None,
-                 modify_reason: str = None,
-                 created_date: datetime = None, limit: int = None, offset: int = None, **kwargs):
+                 device_token: str = None, device_id: str = None, platform_id: str = None, vpn_type_id: int = None,
+                 location: str = None, is_active: bool = None, modify_reason: str = None, created_date: datetime = None,
+                 limit: int = None, offset: int = None, **kwargs):
         StoredObject.__init__(self, storage_service=storage_service, limit=limit, offset=offset)
         UserDevice.__init__(self, suuid=suuid, user_uuid=user_uuid, device_token=device_token, vpn_type_id=vpn_type_id,
-                            device_id=device_id, device_ip=device_ip, platform_id=platform_id,
+                            device_id=device_id, platform_id=platform_id,
                             location=location, is_active=is_active,
                             modify_reason=modify_reason, created_date=created_date)
 
@@ -106,7 +101,6 @@ class UserDeviceDB(UserDeviceStored):
     _user_uuid_field = 'user_uuid'
     _device_token_field = 'device_token'
     _device_id_field = 'device_id'
-    _device_ip_field = 'device_ip'
     _platform_id_field = 'platform_id'
     _vpn_type_id_field = 'vpn_type_id'
     _location_field = 'location'
@@ -128,21 +122,19 @@ class UserDeviceDB(UserDeviceStored):
                                 user_uuid,
                                 device_token,
                                 device_id,
-                                device_ip,
                                 platform_id,
                                 vpn_type_id,
                                 location,
                                 is_active
                             ) 
                           VALUES 
-                            (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            (?, ?, ?, ?, ?, ?, ?, ?)
         '''
         create_user_device_params = (
             self._suuid,
             self._user_uuid,
             self._device_token,
             self._device_id,
-            self._device_ip,
             self._platform_id,
             self._vpn_type_id,
             self._location,
@@ -179,7 +171,6 @@ class UserDeviceDB(UserDeviceStored):
                       public.user_device 
                     SET 
                       device_id = ?,
-                      device_ip = ?,
                       location = ?,
                       is_active = ?,
                       modify_reason = ?
@@ -191,7 +182,6 @@ class UserDeviceDB(UserDeviceStored):
 
         params = (
             self._device_id,
-            self._device_ip,
             self._location,
             self._is_active,
             self._modify_reason,
@@ -286,7 +276,6 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
-                            device_ip,
                             platform_id,
                             vpn_type_id,
                             location,
@@ -339,7 +328,6 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
-                            device_ip,
                             platform_id,
                             vpn_type_id,
                             location,
@@ -393,7 +381,6 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
-                            device_ip,
                             platform_id,
                             vpn_type_id,
                             location,
@@ -447,7 +434,6 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
-                            device_ip,
                             platform_id,
                             vpn_type_id,
                             location,
@@ -491,7 +477,6 @@ class UserDeviceDB(UserDeviceStored):
                             user_uuid,
                             device_token,
                             device_id,
-                            device_ip,
                             platform_id,
                             vpn_type_id,
                             location,
@@ -530,7 +515,6 @@ class UserDeviceDB(UserDeviceStored):
                           user_uuid=user_device_db[self._user_uuid_field],
                           device_token=user_device_db[self._device_token_field],
                           device_id=user_device_db[self._device_id_field],
-                          device_ip=user_device_db[self._device_ip_field],
                           platform_id=user_device_db[self._platform_id_field],
                           vpn_type_id=user_device_db[self._vpn_type_id_field],
                           location=user_device_db[self._location_field],
