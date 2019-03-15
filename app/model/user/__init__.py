@@ -176,7 +176,7 @@ class UserDB(UserStored):
             raise UserException(error=error_message, error_code=error_code, developer_message=developer_message)
         self.logger.debug('User created.')
 
-        return self._suuid
+        return str(self._suuid)
 
     def update(self):
         self._modify_date = datetime.datetime.now()
