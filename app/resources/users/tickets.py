@@ -49,9 +49,10 @@ class UsersTicketsAPI(ResourceAPI):
     def post(self, user_uuid: str) -> Response:
         super(UsersTicketsAPI, self).post(req=request)
 
-        is_valid = check_uuid(suuid=user_uuid)
-        if not is_valid or user_uuid != "anonymous":
-            return make_error_request_response(HTTPStatus.NOT_FOUND, err=AuthError.BAD_USER_IDENTITY)
+        if user_uuid != "anonymous":
+            is_valid = check_uuid(suuid=user_uuid)
+            if not is_valid:
+                return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.BAD_USER_IDENTITY)
 
         request_json = request.json
 
