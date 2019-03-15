@@ -115,9 +115,11 @@ class UsersTicketsAPI(ResourceAPI):
                 return make_api_response(data=response_data, http_code=http_code)
 
         if user_uuid == "anonymous":
-            user_uuid = None
+            suser_uuid = None
+        else:
+            suser_uuid = user_uuid
         self.logger.debug("create userticketdb object")
-        user_ticket_db = UserTicketDB(storage_service=self.__db_storage_service, user_uuid=user_uuid,
+        user_ticket_db = UserTicketDB(storage_service=self.__db_storage_service, user_uuid=suser_uuid,
                                       extra_info=extra_info, status_id=status_id, contact_email=contact_email,
                                       description=description, zip_path=zip_path)
         try:
