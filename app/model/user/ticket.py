@@ -154,12 +154,9 @@ class TicketDB(UserTicketStored):
         self.logger.info('set_zip_path UserTicket')
 
         update_sql = '''
-                    UPDATE 
-                      public.ticket 
-                    SET 
-                      zip_path = ?,
-                    WHERE 
-                      number = ?;
+                    UPDATE public.ticket 
+                    SET zip_path = ?
+                    WHERE number = ?;
         '''
 
         self.logger.debug('Update SQL: %s' % update_sql)
