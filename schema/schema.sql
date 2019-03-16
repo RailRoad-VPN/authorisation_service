@@ -54,7 +54,7 @@ CREATE TABLE public.ticket_status
   , name VARCHAR(100)
 );
 
-CREATE TABLE public.user_ticket
+CREATE TABLE public.ticket
 (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL
   , number SERIAL UNIQUE

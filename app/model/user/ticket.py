@@ -79,7 +79,7 @@ class UserTicketStored(StoredObject, UserTicket):
                             modify_reason=modify_reason, created_date=created_date)
 
 
-class UserTicketDB(UserTicketStored):
+class TicketDB(UserTicketStored):
     __version__ = 1
 
     logger = logging.getLogger(__name__)
@@ -103,7 +103,7 @@ class UserTicketDB(UserTicketStored):
         self._suuid = uuidlib.uuid4()
         self.logger.info('Create object UserTicket with uuid: ' + str(self._suuid))
         create_user_ticket_sql = '''
-                          INSERT INTO public.user_ticket 
+                          INSERT INTO public.ticket 
                             (
                                 uuid,
                                 user_uuid,
@@ -150,12 +150,47 @@ class UserTicketDB(UserTicketStored):
 
         return str(self._number)
 
+    def set_zip_path(self, zip_path):
+        self.logger.info('set_zip_path UserTicket')
+
+        update_sql = '''
+                    UPDATE 
+                      public.ticket 
+                    SET 
+                      zip_path = ?,
+                    WHERE 
+                      number = ?;
+        '''
+
+        self.logger.debug('Update SQL: %s' % update_sql)
+
+        params = (
+            zip_path,
+            self._number,
+        )
+        try:
+            self.logger.debug(f"{self.__class__}: Call database service")
+            self._storage_service.update(update_sql, params)
+        except DatabaseError as e:
+            self._storage_service.rollback()
+            self.logger.error(e)
+            try:
+                e = e.args[0]
+            except IndexError:
+                pass
+            error_message = AuthError.USER_TICKET_UPDATE_ERROR_DB.message
+            developer_message = "%s. DatabaseError.. " \
+                                "Code: %s . %s" % (
+                                    AuthError.USER_TICKET_UPDATE_ERROR_DB.developer_message, e.pgcode, e.pgerror)
+            error_code = AuthError.USER_TICKET_UPDATE_ERROR_DB.code
+            raise UserTicketException(error=error_message, error_code=error_code, developer_message=developer_message)
+
     def update(self):
         self.logger.info('Update UserTicket')
 
         update_sql = '''
                     UPDATE 
-                      public.user_ticket 
+                      public.ticket 
                     SET 
                       user_uuid = ?,
                       contact_email = ?,
@@ -199,7 +234,7 @@ class UserTicketDB(UserTicketStored):
         self.logger.info('delete UserTicket')
 
         delete_sql = '''
-                      DELETE FROM public.user_ticket WHERE uuid = ?;
+                      DELETE FROM public.ticket WHERE uuid = ?;
                      '''
 
         self.logger.debug('delete SQL: %s' % delete_sql)
@@ -238,7 +273,7 @@ class UserTicketDB(UserTicketStored):
                             to_json(modify_date) AS modify_date,
                             to_json(created_date) AS created_date
                         FROM 
-                            public.user_ticket 
+                            public.ticket 
                         WHERE 
                             uuid = ?
                     '''
@@ -290,7 +325,7 @@ class UserTicketDB(UserTicketStored):
                             to_json(modify_date) AS modify_date,
                             to_json(created_date) AS created_date
                         FROM 
-                            public.user_ticket 
+                            public.ticket 
                         WHERE 
                             number = ?
                     '''
@@ -343,7 +378,7 @@ class UserTicketDB(UserTicketStored):
                             to_json(modify_date) AS modify_date,
                             to_json(created_date) AS created_date
                         FROM 
-                            public.user_ticket 
+                            public.ticket 
                         WHERE 
                             user_uuid = ?
                     '''
