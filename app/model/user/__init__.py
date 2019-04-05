@@ -1,9 +1,9 @@
 import datetime
+import logging
 import sys
 import uuid as uuidlib
 from typing import List, Optional
 
-import logging
 from psycopg2._psycopg import DatabaseError
 
 from app.exception import UserException, AuthError, UserNotFoundException
@@ -30,11 +30,14 @@ class User(object):
     _modify_date = None
     _modify_reason = None
     _is_pin_code_activated = None
+    _is_email_confirmed = None
+    _email_confirm_token = None
 
     def __init__(self, suuid: str = None, email: str = None, created_date: datetime = None, password: str = None,
                  is_expired: bool = False, is_locked: bool = False, is_password_expired: bool = False,
                  enabled: bool = False, pin_code: int = None, pin_code_expire_date: datetime = None,
-                 modify_date: datetime = None, modify_reason: str = None, is_pin_code_activated: bool = False):
+                 is_email_confirmed: bool = False, email_confirm_token: str = None, modify_date: datetime = None,
+                 modify_reason: str = None, is_pin_code_activated: bool = False):
         self._suuid = suuid
         self._email = email
         self._created_date = created_date
@@ -48,6 +51,8 @@ class User(object):
         self._modify_date = modify_date
         self._modify_reason = modify_reason
         self._is_pin_code_activated = is_pin_code_activated
+        self._is_email_confirmed = is_email_confirmed
+        self._email_confirm_token = email_confirm_token
 
     def to_dict(self):
         return {
@@ -64,6 +69,8 @@ class User(object):
             'modify_date': self._modify_date,
             'modify_reason': self._modify_reason,
             'is_pin_code_activated': self._is_pin_code_activated,
+            'is_email_confirmed': self._is_email_confirmed,
+            'email_confirm_token': self._email_confirm_token,
         }
 
     def to_api_dict(self):
@@ -81,6 +88,8 @@ class User(object):
             'modify_date': self._modify_date,
             'modify_reason': self._modify_reason,
             'is_pin_code_activated': self._is_pin_code_activated,
+            'is_email_confirmed': self._is_email_confirmed,
+            'email_confirm_token': self._email_confirm_token,
         }
 
 
@@ -92,12 +101,14 @@ class UserStored(StoredObject, User):
     def __init__(self, storage_service: StorageService, suuid: str = None, email: str = None,
                  created_date: datetime = None, password: str = None, is_expired: bool = False, is_locked: bool = False,
                  is_password_expired: bool = False, enabled: bool = False, pin_code: int = None,
+                 is_email_confirmed: bool = False, email_confirm_token: str = None,
                  pin_code_expire_date: datetime = None, modify_date: datetime = None, modify_reason: str = None,
                  is_pin_code_activated=False, limit: int = None, offset: int = None, **kwargs):
         StoredObject.__init__(self, storage_service=storage_service, limit=limit, offset=offset)
         User.__init__(self, suuid=suuid, email=email, created_date=created_date, password=password,
                       is_expired=is_expired, is_locked=is_locked, is_password_expired=is_password_expired,
                       enabled=enabled, pin_code=pin_code, pin_code_expire_date=pin_code_expire_date,
+                      is_email_confirmed=is_email_confirmed, email_confirm_token=email_confirm_token,
                       modify_date=modify_date, modify_reason=modify_reason, is_pin_code_activated=is_pin_code_activated)
 
 
@@ -119,6 +130,8 @@ class UserDB(UserStored):
     _modify_date_field = 'modify_date'
     _modify_reason_field = 'modify_reason'
     _is_pin_code_activated_field = 'is_pin_code_activated'
+    _is_email_confirmed_field = 'is_email_confirmed'
+    _email_confirm_token_field = 'email_confirm_token'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -195,7 +208,9 @@ class UserDB(UserStored):
                       pin_code = ?,
                       pin_code_expire_date = ?,
                       modify_reason = ?,
-                      is_pin_code_activated = ?
+                      is_pin_code_activated = ?,
+                      is_email_confirmed = ?,
+                      email_confirm_token = ?
                     WHERE 
                       uuid = ?;
         '''
@@ -213,6 +228,8 @@ class UserDB(UserStored):
             self._pin_code_expire_date,
             self._modify_reason,
             self._is_pin_code_activated,
+            self._is_email_confirmed,
+            self._email_confirm_token,
             self._suuid
         )
 
@@ -249,7 +266,9 @@ class UserDB(UserStored):
                             to_json(pin_code_expire_date) AS pin_code_expire_date,
                             to_json(modify_date) AS modify_date,
                             modify_reason,
-                            is_pin_code_activated
+                            is_pin_code_activated,
+                            is_email_confirmed,
+                            email_confirm_token
                         FROM 
                             public."user" 
                         WHERE 
@@ -302,7 +321,9 @@ class UserDB(UserStored):
                             to_json(pin_code_expire_date) AS pin_code_expire_date,
                             to_json(modify_date) AS modify_date,
                             modify_reason,
-                            is_pin_code_activated
+                            is_pin_code_activated,
+                            is_email_confirmed,
+                            email_confirm_token
                         FROM 
                             public."user" 
                         WHERE 
@@ -355,7 +376,9 @@ class UserDB(UserStored):
                             to_json(pin_code_expire_date) AS pin_code_expire_date,
                             to_json(modify_date) AS modify_date,
                             modify_reason,
-                            is_pin_code_activated
+                            is_pin_code_activated,
+                            is_email_confirmed,
+                            email_confirm_token
                         FROM 
                             public."user" 
                         WHERE 
@@ -408,7 +431,9 @@ class UserDB(UserStored):
                             to_json(pin_code_expire_date) AS pin_code_expire_date,
                             to_json(modify_date) AS modify_date,
                             modify_reason,
-                            is_pin_code_activated
+                            is_pin_code_activated,
+                            is_email_confirmed,
+                            email_confirm_token
                         FROM 
                             public."user" 
                     '''
@@ -445,4 +470,7 @@ class UserDB(UserStored):
                     created_date=user_db[self._created_date_field], password=user_db[self._password_field],
                     enabled=user_db[self._enabled_field], pin_code=user_db[self._pin_code_field],
                     pin_code_expire_date=user_db[self._pin_code_expire_date_field],
-                    is_pin_code_activated=user_db[self._is_pin_code_activated_field])
+                    is_pin_code_activated=user_db[self._is_pin_code_activated_field],
+                    is_email_confirmed=user_db[self._is_email_confirmed_field],
+                    email_confirm_token = user_db[self._email_confirm_token_field]
+        )

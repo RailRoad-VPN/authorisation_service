@@ -31,6 +31,8 @@ CREATE TABLE public.user
   , pin_code              INT
   , pin_code_expire_date  TIMESTAMP
   , is_pin_code_activated BOOLEAN                                             DEFAULT FALSE
+  , email_confirmed       BOOLEAN                                             DEFAULT FALSE
+  , email_confirm_token   UUID   DEFAULT gen_random_uuid()           NOT NULL
 );
 
 CREATE TABLE public.user_device
