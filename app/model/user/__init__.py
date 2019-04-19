@@ -209,8 +209,7 @@ class UserDB(UserStored):
                       pin_code_expire_date = ?,
                       modify_reason = ?,
                       is_pin_code_activated = ?,
-                      is_email_confirmed = ?,
-                      email_confirm_token = ?
+                      is_email_confirmed = ?
                     WHERE 
                       uuid = ?;
         '''
@@ -229,7 +228,6 @@ class UserDB(UserStored):
             self._modify_reason,
             self._is_pin_code_activated,
             self._is_email_confirmed,
-            self._email_confirm_token,
             self._suuid
         )
 
