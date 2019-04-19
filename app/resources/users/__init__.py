@@ -116,6 +116,7 @@ class UsersAPI(ResourceAPI):
         pin_code_expire_date = request_json.get(UserDB._pin_code_expire_date_field, None)
         modify_reason = request_json.get(UserDB._modify_reason_field, None)
         is_pin_code_activated = request_json.get(UserDB._is_pin_code_activated_field, None)
+        is_email_confirmed = request_json.get(UserDB._is_email_confirmed_field, False)
 
         req_fields = {
             'email': email,
@@ -134,6 +135,7 @@ class UsersAPI(ResourceAPI):
             return resp
 
         user_db = UserDB(storage_service=self.__db_storage_service, suuid=user_uuid, email=email,
+                         is_email_confirmed=is_email_confirmed,
                          is_password_expired=is_password_expired, password=password, is_expired=is_expired,
                          is_locked=is_locked, enabled=enabled, modify_reason=modify_reason, pin_code=pin_code,
                          pin_code_expire_date=pin_code_expire_date, is_pin_code_activated=is_pin_code_activated)
