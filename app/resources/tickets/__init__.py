@@ -55,7 +55,7 @@ class TicketsAPI(ResourceAPI):
             return make_error_request_response(HTTPStatus.BAD_REQUEST, err=AuthError.REQUEST_NO_JSON)
 
         user_uuid = request_json.get(TicketDB._user_uuid_field, None)
-        contact_email = request_json.get(TicketDB._contact_email_field, None)
+        contact_email = request_json.get(TicketDB._contact_email_field, 'anonymous')
         description = request_json.get(TicketDB._description_field, None)
         status_id = request_json.get(TicketDB._status_id_field, None)
         extra_info = request_json.get(TicketDB._extra_info_field, None)
